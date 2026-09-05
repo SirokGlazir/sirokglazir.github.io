@@ -50,9 +50,230 @@
             overflow-y: auto; text-align: center;
         }
         .info-content {
-            background: rgba(0, 0, 0, 0.85); /* Затемнение, чтобы текст читался */
+            background: rgba(0, 0, 0, 0.85);
             padding: 40px; border-radius: 15px; border: 2px solid #fff;
             max-width: 800px; margin: 40px auto; box-shadow: 0 0 30px rgba(255,255,255,0.2);
+        }
+
+        /* КНОПКА МИНИ-ИГР */
+        /* КНОПКА МИНИ-ИГР В ЛЕВОМ ВЕРХНЕМ УГЛУ */
+.btn-minigames {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    padding: 12px 25px;
+    font-size: 16px;
+    background: rgba(0, 0, 0, 0.85);
+    color: #fff;
+    border: 2px solid #fff;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    z-index: 55;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.btn-minigames:hover {
+    background: #fff;
+    color: #000;
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.5);
+    transform: scale(1.05);
+}
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* ЭКРАН СПИСКА МИНИ-ИГР */
+        #screen-games-list {
+            position: fixed; width: 100%; height: 100%; top: 0; left: 0;
+            background: rgba(0, 0, 0, 0.95); display: none; padding: 30px;
+            z-index: 60; overflow-y: auto;
+        }
+        .games-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 30px;
+            padding: 20px;
+        }
+        .game-card {
+            background: rgba(30, 30, 50, 0.9);
+            border: 2px solid #667eea;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+        }
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 0 40px rgba(102, 126, 234, 0.8);
+            border-color: #fff;
+        }
+        .game-avatar {
+            width: 100%;
+            height: 200px;
+            background: #2a2a4a;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            overflow: hidden;
+        }
+        .game-title {
+            color: #fff;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .game-description {
+            color: #aaa;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        .btn-back {
+            display: inline-block;
+            padding: 10px 30px;
+            font-size: 18px;
+            background: #333;
+            color: white;
+            border: 2px solid #fff;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 20px;
+            transition: all 0.3s;
+        }
+        .btn-back:hover {
+            background: #fff;
+            color: #000;
+            box-shadow: 0 0 15px #fff;
+        }
+
+        /* ЭКРАН ИГРЫ */
+        #screen-game {
+            position: fixed; width: 100%; height: 100%; top: 0; left: 0;
+            background: #000; display: none; z-index: 100; overflow: hidden;
+        }
+        .game-layout {
+            display: flex;
+            height: 100vh;
+            background: #1a1a2e;
+        }
+        .game-area {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        #gameCanvas {
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+        }
+        .game-settings {
+            width: 280px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            overflow-y: auto;
+            border-left: 2px solid #0f0;
+        }
+        .game-settings h3 {
+            color: #0f0;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 20px;
+        }
+        .setting-group {
+            margin-bottom: 15px;
+        }
+        .setting-group label {
+            color: #0f0;
+            font-size: 14px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .setting-group input[type="range"] {
+            width: 100%;
+            margin: 5px 0;
+        }
+        .setting-group input[type="checkbox"] {
+            margin-right: 8px;
+        }
+        .setting-group .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            color: #0f0;
+        }
+        .game-stats {
+            background: #1a1a2e;
+            border: 1px solid #0f0;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .game-stats p {
+            margin: 5px 0;
+            color: #0f0;
+            font-size: 13px;
+        }
+        .game-stats strong {
+            color: #fff;
+        }
+        .game-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .game-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-start-game {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+        }
+        .btn-start-game:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+        }
+        .btn-pause-game {
+            background: #f0f0f0;
+            color: #333;
+        }
+        .btn-pause-game:hover {
+            background: #e0e0e0;
+        }
+        .btn-reset-game {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-reset-game:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn-exit-game {
+            background: #ff4444;
+            color: white;
+        }
+        .btn-exit-game:hover {
+            background: #cc0000;
+            transform: translateY(-2px);
         }
 
         /* ЭКРАН КРИТИЧЕСКОГО СБОЯ */
@@ -97,8 +318,11 @@
         <div id="hack-console"></div>
     </div>
 
-        <!-- ЭКРАН 4 -->
+    <!-- ЭКРАН 4 -->
     <div id="screen-info" style="overflow-y: scroll; padding: 20px 10px;">
+
+        <!-- КНОПКА МИНИ-ИГР (фиксированная позиция) -->
+<button class="btn-minigames" onclick="openGamesList()">🎮 Мини-игры</button>
         
         <!-- КАРТОЧКА 1: ДОСТУП РАЗРЕШЕН И СОЦСЕТИ -->
         <div class="info-content" style="margin-top: 20px;">
@@ -116,10 +340,10 @@
             </div>
         </div>
 
-        <!-- КАРТОЧКА 2: ОБ ОВТОРЕ -->
+        <!-- КАРТОЧКА 2: ОБ АВТОРЕ -->
         <div class="info-content">
-            <h2 style="color: #0f0; margin-bottom: 15px;">Обо мне</h2><p>Всем здравствуйте кто посетил мой сайт. Я обычный подросток энтузиаст которому 16 лет. Увлекаюсь 3д моделированием, программированием и разработкой игр на unity. Переходите в мой ТГК канал. Там я часто выкладываю достижения и файлы.
-            </p>
+            <h2 style="color: #0f0; margin-bottom: 15px;">Обо мне</h2>
+            <p>Всем здравствуйте кто посетил мой сайт. Я обычный подросток энтузиаст которому 16 лет. Увлекаюсь 3д моделированием, программированием и разработкой игр на unity. Переходите в мой ТГК канал. Там я часто выкладываю достижения и файлы.</p>
         </div>
 
         <!-- КАРТОЧКА 3: ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ -->
@@ -132,6 +356,104 @@
 
     </div>
 
+    <!-- ЭКРАН СПИСКА МИНИ-ИГР -->
+    <div id="screen-games-list">
+        <button class="btn-back" onclick="closeGamesList()">← Назад</button>
+        <h2 style="color: #0f0; text-align: center; margin: 20px;">🎮 Мини-игры</h2>
+        
+        <div class="games-container">
+            <!-- КАРТОЧКА ИГРЫ 1 -->
+            <div class="game-card" onclick="window.open('ball-game.html', '_blank')">
+    <div class="game-avatar" style="background: #1a1a2e;">
+        <span style="font-size: 60px;">🔵</span>
+    </div>
+    <div class="game-title">Шарики в круге</div>
+    <div class="game-description">
+        Шарики отскакивают от стенок, оставляют следы и разрезают следы других шариков!
+    </div>
+</div>
+            
+            <!-- КАРТОЧКА ИГРЫ 2 (ЗАГЛУШКА) -->
+            <div class="game-card" onclick="alert('Игра в разработке!')">
+                <div class="game-avatar" style="background: #2a2a4a;">
+                    <!-- Тут будет ваша аватарка -->
+                    <span style="font-size: 60px;">🚧</span>
+                </div>
+                <div class="game-title">В разработке</div>
+                <div class="game-description">
+                    Новая игра скоро появится!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ЭКРАН ИГРЫ С ШАРИКАМИ -->
+    <div id="screen-game">
+        <div class="game-layout">
+            <!-- Игровая область -->
+            <div class="game-area">
+                <canvas id="gameCanvas" width="800" height="600"></canvas>
+                <div id="startOverlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
+                    <h2 style="color: #0f0; font-size: 32px; margin-bottom: 20px; text-shadow: 0 0 20px #0f0;">🎮 Нажмите "Старт"</h2>
+                </div>
+                <div id="gameOver" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #ff0000; font-size: 24px; font-weight: bold; text-align: center; display: none; text-shadow: 0 0 10px #ff0000; pointer-events: none;">
+                    Игра окончена!<br>Все шарики исчезли
+                </div>
+            </div>
+            
+            <!-- Панель настроек -->
+            <div class="game-settings">
+                <h3>🎮 Настройки</h3>
+                
+                <div class="setting-group">
+                    <label>Количество шаров: <span id="ballCountValue" style="color: #fff;">5</span></label>
+                    <input type="range" id="ballCount" min="2" max="12" value="5" step="1">
+                </div>
+                
+                <div class="setting-group">
+                    <label>Размер шаров: <span id="ballSizeValue" style="color: #fff;">15</span></label>
+                    <input type="range" id="ballSize" min="5" max="30" value="15" step="1">
+                </div>
+                
+                <div class="setting-group">
+                    <label>Начальная скорость: <span id="baseSpeedValue" style="color: #fff;">2</span></label>
+                    <input type="range" id="baseSpeed" min="1" max="10" value="2" step="0.5">
+                </div>
+                
+                <div class="setting-group">
+                    <label>Прирост скорости: <span id="speedIncrementValue" style="color: #fff;">0.15</span></label>
+                    <input type="range" id="speedIncrement" min="0.01" max="0.5" value="0.15" step="0.01">
+                </div>
+                
+                <div class="setting-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="showTrails" checked>
+                        Показывать следы
+                    </label>
+                </div>
+                
+                <div class="setting-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="collisionBetweenBalls" checked>
+                        Столкновения между шарами
+                    </label>
+                </div>
+                
+                <div class="game-stats">
+                    <p>Активных шариков: <strong id="aliveBalls">5</strong></p>
+                    <p>Всего следов: <strong id="totalTrails">0</strong></p>
+                    <p>Статус: <strong id="gameStatus">Не начата</strong></p>
+                </div>
+                
+                <div class="game-buttons">
+                    <button class="game-btn btn-start-game" id="startButton" onclick="startGame()">▶️ Старт</button>
+                    <button class="game-btn btn-pause-game" id="pauseButton" onclick="togglePause()" disabled>⏸️ Пауза</button>
+                    <button class="game-btn btn-reset-game" onclick="resetGame()">🔄 Перезапустить</button>
+                    <button class="game-btn btn-exit-game" onclick="closeBallGame()">🚪 Выйти</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- ЭКРАН КРИТИЧЕСКОГО СБОЯ -->
     <div id="screen-crash">
@@ -140,6 +462,7 @@
     </div>
 
     <script>
+        // ВАШ СУЩЕСТВУЮЩИЙ КОД (матрица, экраны, и т.д.)
         const _0x4f12 = [
             "matrix-canvas", "2d", 
             "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ\u2620\u2623\u2699\uff66\uff71\uff73\uff74\uff75\uff76\uff77\uff79\uff7a\uff7b\uff7c\uff7d\uff7e\uff7f", 
@@ -276,6 +599,35 @@
             }
             loop();
         }
+
+        // ФУНКЦИИ ДЛЯ МИНИ-ИГР
+        function openGamesList() {
+    document.getElementById('screen-info').style.display = 'none';
+    document.getElementById('screen-games-list').style.display = 'block';
+    // Скрываем кнопку мини-игр
+    document.querySelector('.btn-minigames').style.display = 'none';
+}
+
+function closeGamesList() {
+    document.getElementById('screen-games-list').style.display = 'none';
+    document.getElementById('screen-info').style.display = 'block';
+    // Показываем кнопку мини-игр
+    document.querySelector('.btn-minigames').style.display = 'block';
+}
+
+        function openBallGame() {
+            document.getElementById('screen-games-list').style.display = 'none';
+            document.getElementById('screen-game').style.display = 'block';
+            // Останавливаем матрицу на фоне
+            clearInterval(matrixInterval);
+        }
+
+        function closeBallGame() {
+            document.getElementById('screen-game').style.display = 'none';
+            document.getElementById('screen-games-list').style.display = 'block';
+            // Возобновляем матрицу
+            matrixInterval = setInterval(drawMatrix, 30);
+        }
     </script>
-</body>
+    </body>
 </html>

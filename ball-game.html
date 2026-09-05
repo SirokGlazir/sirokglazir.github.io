@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Шарики в круге</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .game-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1100px;
+            width: 100%;
+            height: 90vh;
+        }
+        .game-area {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        #gameCanvas {
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+            background: #0a0a0a;
+            border: 2px solid #0f0;
+        }
+        .start-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
+        }
+        .start-overlay h2 {
+            color: #0f0;
+            font-size: 28px;
+            text-shadow: 0 0 20px #0f0;
+        }
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #f00;
+            font-size: 24px;
+            font-weight: bold;
+            display: none;
+            text-shadow: 0 0 10px #f00;
+        }
+        .settings-panel {
+            width: 280px;
+            background: #0a0a0a;
+            border: 2px solid #0f0;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+        .settings-panel h3 {
+            color: #0f0;
+            text-align: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #0f0;
+            padding-bottom: 10px;
+            font-size: 18px;
+        }
+        .setting-group { margin-bottom: 12px; }
+        .setting-group label {
+            color: #0f0;
+            font-size: 12px;
+            display: block;
+            margin-bottom: 3px;
+        }
+        .setting-group input[type="range"] {
+            width: 100%;
+            accent-color: #0f0;
+        }
+        .setting-group span { color: #fff; font-weight: bold; }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            color: #0f0;
+            font-size: 12px;
+        }
+        .checkbox-label input {
+            margin-right: 6px;
+            accent-color: #0f0;
+        }
+        .stats {
+            background: #0a0a0a;
+            border: 1px solid #0f0;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .stats p { margin: 4px 0; color: #0f0; font-size: 11px; }
+        .stats strong { color: #fff; }
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: auto;
+        }
+        button {
+            padding: 10px;
+            border: 1px solid #0f0;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s;
+        }
+        .btn-start { background: #0f0; color: #000; }
+        .btn-start:hover { background: #000; color: #0f0; box-shadow: 0 0 20px #0f0; }
+        .btn-pause { background: #0a0a0a; color: #0f0; }
+        .btn-pause:hover { background: #0f0; color: #000; }
+        .btn-add { background: #0a0a0a; color: #0f0; }
+        .btn-add:hover { background: #0f0; color: #000; }
+        .btn-reset { background: #0a0a0a; color: #0f0; }
+        .btn-reset:hover { background: #0f0; color: #000; }
+        .btn-back { background: #0a0a0a; color: #f00; border-color: #f00; }
+        .btn-back:hover { background: #f00; color: #000; }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-area">
+            <canvas id="gameCanvas" width="700" height="600"></canvas>
+            <div class="start-overlay" id="startOverlay">
+                <h2>🎮 НАЖМИТЕ "СТАРТ"</h2>
+            </div>
+            <div class="game-over" id="gameOver">ИГРА ОКОНЧЕНА!</div>
+        </div>
+        
+        <div class="settings-panel">
+            <h3>🎮 НАСТРОЙКИ</h3>
+            
+            <div class="setting-group">
+                <label>ШАРОВ: <span id="ballCountValue">5</span></label>
+                <input type="range" id="ballCount" min="2" max="12" value="5" step="1">
+            </div>
+            
+            <div class="setting-group">
+                <label>РАЗМЕР: <span id="ballSizeValue">15</span></label>
+                <input type="range" id="ballSize" min="5" max="30" value="15" step="1">
+            </div>
+            
+            <div class="setting-group">
+                <label>СКОРОСТЬ: <span id="baseSpeedValue">2</span></label>
+                <input type="range" id="baseSpeed" min="1" max="10" value="2" step="0.5">
+            </div>
+            
+            <div class="setting-group">
+                <label>ПРИРОСТ: <span id="speedIncrementValue">0.15</span></label>
+                <input type="range" id="speedIncrement" min="0.01" max="0.5" value="0.15" step="0.01">
+            </div>
+            
+            <div class="setting-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="showTrails" checked>
+                    СЛЕДЫ
+                </label>
+            </div>
+            
+            <div class="setting-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="collisionBetweenBalls" checked>
+                    СТОЛКНОВЕНИЯ
+                </label>
+            </div>
+            
+            <div class="stats">
+                <p>АКТИВНЫХ: <strong id="aliveBalls">5</strong></p>
+                <p>СЛЕДОВ: <strong id="totalTrails">0</strong></p>
+                <p>ВРЕМЯ: <strong id="gameTime">0:00</strong></p>
+                <p>СТАТУС: <strong id="gameStatus">НЕ НАЧАТА</strong></p>
+            </div>
+            
+            <div class="buttons">
+                <button class="btn-start" id="startButton" onclick="startGame()">▶ СТАРТ</button>
+                <button class="btn-pause" id="pauseButton" onclick="togglePause()" disabled>⏸ ПАУЗА</button>
+                <button class="btn-add" id="addBallButton" onclick="addBall()" disabled>➕ ШАРИК</button>
+                <button class="btn-reset" onclick="resetGame()">🔄 ЗАНОВО</button>
+                <button class="btn-back" onclick="window.close()">← НАЗАД</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let balls = [];
+        let isPaused = false;
+        let isGameStarted = false;
+        let animationId = null;
+        let gameTime = 0;
+        let gameTimer = null;
+        
+        const circleCenter = { x: canvas.width / 2, y: canvas.height / 2 };
+        const circleRadius = Math.min(canvas.width, canvas.height) / 2 - 50;
+        
+        // РАЗНОЦВЕТНЫЕ ШАРИКИ
+        const ballColors = [
+            '#ff4444', '#4444ff', '#44ff44', '#ffff44',
+            '#ff44ff', '#44ffff', '#ff8844', '#8844ff',
+            '#ff4488', '#88ff44', '#4488ff', '#ffaa00'
+        ];
+        
+        class TrailSegment {
+            constructor(collisionX, collisionY, ballRef) {
+                this.collisionX = collisionX;
+                this.collisionY = collisionY;
+                this.ballRef = ballRef;
+                this.width = 4;
+                this.life = 1;
+                this.isCut = false;
+                this.cutAnimationTime = 0.5;
+            }
+            update() {
+                if (this.isCut) {
+                    this.cutAnimationTime -= 0.02;
+                    if (this.cutAnimationTime <= 0) this.life = 0;
+                }
+            }
+            cut() {
+                if (!this.isCut) {
+                    this.isCut = true;
+                    this.cutAnimationTime = 0.5;
+                }
+            }
+        }
+        
+        class Ball {
+            constructor(x, y, size, velocity, color, id) {
+                this.x = x;
+                this.y = y;
+                this.size = size;
+                this.velocity = velocity;
+                this.color = color;
+                this.id = id;
+                this.trails = [];
+                this.trailCount = 0;
+                this.hasTrails = false;
+                this.speed = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
+                this.mass = size;
+                this.invincible = false;
+                this.invincibleTime = 0;
+            }
+            addTrail(collisionX, collisionY) {
+                const trail = new TrailSegment(collisionX, collisionY, this);
+                this.trails.push(trail);
+                this.trailCount++;
+                this.hasTrails = true;
+            }
+            updateTrails() {
+                this.trails.forEach(t => t.update());
+                this.trails = this.trails.filter(t => t.life > 0);
+                this.hasTrails = this.trails.length > 0;
+            }
+            shouldBeRemoved() {
+                return this.trailCount > 0 && !this.hasTrails;
+            }
+            update(balls) {
+                if (this.invincible) {
+                    this.invincibleTime -= 0.016;
+                    if (this.invincibleTime <= 0) this.invincible = false;
+                }
+                
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+                
+                // Столкновение с кругом
+                const dx = this.x - circleCenter.x;
+                const dy = this.y - circleCenter.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const maxDistance = circleRadius - this.size;
+                
+                if (distance > maxDistance) {
+                    const nx = dx / distance;
+                    const ny = dy / distance;
+                    const collisionX = circleCenter.x + nx * circleRadius;
+                    const collisionY = circleCenter.y + ny * circleRadius;
+                    this.x = circleCenter.x + nx * maxDistance;
+                    this.y = circleCenter.y + ny * maxDistance;
+                    const dot = this.velocity.x * nx + this.velocity.y * ny;
+                    this.velocity.x -= 2 * dot * nx;
+                    this.velocity.y -= 2 * dot * ny;
+                    const randomAngle = (Math.random() - 0.5) * 0.5;
+                    const cos = Math.cos(randomAngle);
+                    const sin = Math.sin(randomAngle);
+                    const newVx = this.velocity.x * cos - this.velocity.y * sin;
+                    const newVy = this.velocity.x * sin + this.velocity.y * cos;
+                    this.velocity.x = newVx;
+                    this.velocity.y = newVy;
+                    this.addTrail(collisionX, collisionY);
+                    const speedIncrement = parseFloat(document.getElementById('speedIncrement').value) || 0.15;
+                    const currentSpeed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
+                    const newSpeed = currentSpeed + speedIncrement;
+                    const scale = newSpeed / currentSpeed;
+                    this.velocity.x *= scale;
+                    this.velocity.y *= scale;
+                    this.speed = newSpeed;
+                }
+                
+                // Столкновения между шарами
+                if (document.getElementById('collisionBetweenBalls').checked) {
+                    balls.forEach(other => {
+                        if (other !== this) {
+                            const dx2 = other.x - this.x;
+                            const dy2 = other.y - this.y;
+                            const dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+                            const minDist = this.size + other.size;
+                            
+                            if (dist2 < minDist && dist2 > 0) {
+                                const nx = dx2 / dist2;
+                                const ny = dy2 / dist2;
+                                const overlap = (minDist - dist2) / 2;
+                                this.x -= nx * overlap;
+                                this.y -= ny * overlap;
+                                other.x += nx * overlap;
+                                other.y += ny * overlap;
+                                
+                                const dvx = other.velocity.x - this.velocity.x;
+                                const dvy = other.velocity.y - this.velocity.y;
+                                const dvn = dvx * nx + dvy * ny;
+                                
+                                if (dvn < 0) {
+                                    const totalMass = this.mass + other.mass;
+                                    const impulse = -(1 + 0.9) * dvn / totalMass;
+                                    this.velocity.x -= impulse * other.mass * nx;
+                                    this.velocity.y -= impulse * other.mass * ny;
+                                    other.velocity.x += impulse * this.mass * nx;
+                                    other.velocity.y += impulse * this.mass * ny;
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // Разрезание полос
+                if (!this.invincible) {
+                    balls.forEach(other => {
+                        if (other !== this && other.color !== this.color) {
+                            other.trails.forEach(trail => {
+                                if (!trail.isCut) {
+                                    const lsx = trail.collisionX;
+                                    const lsy = trail.collisionY;
+                                    const lex = trail.ballRef.x;
+                                    const ley = trail.ballRef.y;
+                                    const dx2 = lex - lsx;
+                                    const dy2 = ley - lsy;
+                                    const lenSq = dx2 * dx2 + dy2 * dy2;
+                                    if (lenSq === 0) {
+                                        const d = Math.sqrt((this.x - lsx) * (this.x - lsx) + (this.y - lsy) * (this.y - lsy));
+                                        if (d < this.size + trail.width) trail.cut();
+                                    } else {
+                                        let t = ((this.x - lsx) * dx2 + (this.y - lsy) * dy2) / lenSq;
+                                        t = Math.max(0, Math.min(1, t));
+                                        const cx = lsx + t * dx2;
+                                        const cy = lsy + t * dy2;
+                                        const d = Math.sqrt((this.x - cx) * (this.x - cx) + (this.y - cy) * (this.y - cy));
+                                        if (d < this.size + trail.width) trail.cut();
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+                
+                this.updateTrails();
+            }
+            draw(ctx) {
+                ctx.save();
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = this.invincible ? 25 : 15;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = this.invincible ? '#fff' : '#aaa';
+                ctx.lineWidth = this.invincible ? 3 : 1;
+                ctx.stroke();
+                ctx.restore();
+            }
+            drawTrails(ctx) {
+                this.trails.forEach(trail => {
+                    if (trail.isCut && trail.cutAnimationTime <= 0) return;
+                    ctx.save();
+                    if (trail.isCut) {
+                        ctx.globalAlpha = trail.cutAnimationTime / 0.5;
+                        ctx.strokeStyle = '#ff0000';
+                        ctx.lineWidth = trail.width;
+                        ctx.setLineDash([5, 5]);
+                    } else {
+                        ctx.globalAlpha = 1;
+                        ctx.strokeStyle = this.color;
+                        ctx.lineWidth = trail.width;
+                        ctx.setLineDash([]);
+                    }
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(trail.collisionX, trail.collisionY);
+                    ctx.lineTo(this.x, this.y);
+                    ctx.stroke();
+                    ctx.restore();
+                });
+            }
+        }
+        
+        function applyInvincibility() {
+            balls.forEach(ball => {
+                ball.invincible = true;
+                ball.invincibleTime = 5;
+            });
+        }
+        
+        function initGame() {
+            balls = [];
+            const ballCount = parseInt(document.getElementById('ballCount').value) || 5;
+            const ballSize = parseFloat(document.getElementById('ballSize').value) || 15;
+            const baseSpeed = parseFloat(document.getElementById('baseSpeed').value) || 2;
+            for (let i = 0; i < ballCount; i++) {
+                const angle = (i / ballCount) * Math.PI * 2;
+                const safeDistance = circleRadius * 0.5;
+                const x = circleCenter.x + safeDistance * Math.cos(angle);
+                const y = circleCenter.y + safeDistance * Math.sin(angle);
+                const randomOffset = (Math.random() - 0.5) * 0.3;
+                const velocityAngle = angle + randomOffset;
+                const velocity = {
+                    x: baseSpeed * Math.cos(velocityAngle),
+                    y: baseSpeed * Math.sin(velocityAngle)
+                };
+                balls.push(new Ball(x, y, ballSize, velocity, ballColors[i % ballColors.length], i));
+            }
+            updateStats();
+            drawGame();
+        }
+        
+        function addBall() {
+            if (!isGameStarted) return;
+            const ballSize = parseFloat(document.getElementById('ballSize').value) || 15;
+            const baseSpeed = parseFloat(document.getElementById('baseSpeed').value) || 2;
+            let x, y, attempts = 0;
+            let foundSpot = false;
+            while (!foundSpot && attempts < 50) {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * (circleRadius * 0.7);
+                x = circleCenter.x + distance * Math.cos(angle);
+                y = circleCenter.y + distance * Math.sin(angle);
+                foundSpot = true;
+                balls.forEach(ball => {
+                    const dx = x - ball.x;
+                    const dy = y - ball.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < ballSize * 3) foundSpot = false;
+                });
+                attempts++;
+            }
+            if (foundSpot) {
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = {
+                    x: baseSpeed * Math.cos(angle),
+                    y: baseSpeed * Math.sin(angle)
+                };
+                const newId = balls.length;
+                const newColor = ballColors[newId % ballColors.length];
+                const newBall = new Ball(x, y, ballSize, velocity, newColor, newId);
+                newBall.invincible = true;
+                newBall.invincibleTime = 3;
+                balls.push(newBall);
+                updateStats();
+            }
+        }
+        
+        function startGame() {
+            if (!isGameStarted) {
+                isGameStarted = true;
+                isPaused = false;
+                document.getElementById('startOverlay').style.display = 'none';
+                document.getElementById('startButton').disabled = true;
+                document.getElementById('pauseButton').disabled = false;
+                document.getElementById('addBallButton').disabled = false;
+                document.getElementById('pauseButton').textContent = '⏸ ПАУЗА';
+                applyInvincibility();
+                gameTime = 0;
+                gameTimer = setInterval(() => {
+                    if (isGameStarted && !isPaused) {
+                        gameTime++;
+                        const minutes = Math.floor(gameTime / 60);
+                        const seconds = gameTime % 60;
+                        document.getElementById('gameTime').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    }
+                }, 1000);
+                updateStats();
+            }
+        }
+        
+        function updateGame() {
+            if (!isGameStarted || isPaused) return;
+            const ballsToRemove = [];
+            balls.forEach(ball => {
+                ball.update(balls);
+                if (ball.shouldBeRemoved()) ballsToRemove.push(ball);
+            });
+            ballsToRemove.forEach(ball => {
+                const index = balls.indexOf(ball);
+                if (index > -1) balls.splice(index, 1);
+            });
+            updateStats();
+            if (balls.length === 0 && isGameStarted) {
+                document.getElementById('gameOver').style.display = 'block';
+                isGameStarted = false;
+                clearInterval(gameTimer);
+                document.getElementById('addBallButton').disabled = true;
+                setTimeout(() => {
+                    document.getElementById('gameOver').style.display = 'none';
+                    resetGame();
+                }, 2000);
+            }
+        }
+        
+        function drawGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0a0a0a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            ctx.arc(circleCenter.x, circleCenter.y, circleRadius, 0, Math.PI * 2);
+            ctx.strokeStyle = '#0f0';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.shadowColor = '#0f0';
+            ctx.shadowBlur = 20;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+            if (document.getElementById('showTrails').checked) {
+                balls.forEach(ball => ball.drawTrails(ctx));
+            }
+            balls.forEach(ball => ball.draw(ctx));
+            if (balls.length <= 2 && balls.length > 0 && isGameStarted) {
+                ctx.fillStyle = '#ffff00';
+                ctx.font = 'bold 16px Courier New';
+                ctx.textAlign = 'center';
+                ctx.fillText('⚠ МАЛО ШАРИКОВ!', canvas.width / 2, 30);
+            }
+        }
+        
+        function gameLoop() {
+            updateGame();
+            drawGame();
+            animationId = requestAnimationFrame(gameLoop);
+        }
+        
+        function updateStats() {
+            document.getElementById('aliveBalls').textContent = balls.length;
+            const totalTrails = balls.reduce((sum, ball) => sum + ball.trails.length, 0);
+            document.getElementById('totalTrails').textContent = totalTrails;
+            if (!isGameStarted) document.getElementById('gameStatus').textContent = 'НЕ НАЧАТА';
+            else if (isPaused) document.getElementById('gameStatus').textContent = 'ПАУЗА';
+            else document.getElementById('gameStatus').textContent = 'ИГРА';
+        }
+        
+        function resetGame() {
+            isGameStarted = false;
+            isPaused = false;
+            clearInterval(gameTimer);
+            gameTime = 0;
+            document.getElementById('gameTime').textContent = '0:00';
+            document.getElementById('startOverlay').style.display = 'block';
+            document.getElementById('startButton').disabled = false;
+            document.getElementById('pauseButton').disabled = true;
+            document.getElementById('addBallButton').disabled = true;
+            document.getElementById('pauseButton').textContent = '⏸ ПАУЗА';
+            document.getElementById('gameOver').style.display = 'none';
+            initGame();
+            updateStats();
+        }
+        
+        function togglePause() {
+            if (!isGameStarted) return;
+            isPaused = !isPaused;
+            const pauseButton = document.getElementById('pauseButton');
+            if (isPaused) pauseButton.textContent = '▶ ПРОДОЛЖИТЬ';
+            else pauseButton.textContent = '⏸ ПАУЗА';
+            updateStats();
+        }
+        
+        document.getElementById('ballCount').addEventListener('input', function(e) {
+            document.getElementById('ballCountValue').textContent = e.target.value;
+            if (!isGameStarted) initGame();
+        });
+        document.getElementById('ballSize').addEventListener('input', function(e) {
+            document.getElementById('ballSizeValue').textContent = e.target.value;
+            if (!isGameStarted) initGame();
+        });
+        document.getElementById('baseSpeed').addEventListener('input', function(e) {
+            document.getElementById('baseSpeedValue').textContent = e.target.value;
+            if (!isGameStarted) initGame();
+        });
+        document.getElementById('speedIncrement').addEventListener('input', function(e) {
+            document.getElementById('speedIncrementValue').textContent = e.target.value;
+        });
+        document.getElementById('showTrails').addEventListener('change', drawGame);
+        
+        initGame();
+        animationId = requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>

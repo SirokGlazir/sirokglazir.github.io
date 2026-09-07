@@ -13,14 +13,13 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 10px; /* Уменьшили отступы для мобильных */
+            padding: 10px;
         }
         .game-container {
             display: flex;
             gap: 20px;
             max-width: 1100px;
             width: 100%;
-            height: auto; /* Позволяем контейнеру подстраиваться под высоту элементов */
         }
         .game-area {
             flex: 1;
@@ -35,9 +34,9 @@
             box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
             background: #0a0a0a;
             border: 2px solid #0f0;
-            max-width: 100%; /* Холст сжимается по ширине экрана */
-            height: auto;    /* Пропорции холста сохраняются */
-            aspect-ratio: 7 / 6; /* Фиксируем пропорцию 700х600 */
+            max-width: 100%;
+            height: auto;
+            aspect-ratio: 7 / 6;
         }
         .start-overlay {
             position: absolute;
@@ -46,11 +45,11 @@
             transform: translate(-50%, -50%);
             text-align: center;
             pointer-events: none;
-            width: 90%;
+            width: 100%;
         }
         .start-overlay h2 {
             color: #0f0;
-            font-size: 24px; /* Чуть уменьшили для мобильных */
+            font-size: 24px;
             text-shadow: 0 0 20px #0f0;
         }
         .game-over {
@@ -73,7 +72,6 @@
             box-shadow: 0 0 30px rgba(0, 255, 0, 0.2);
             display: flex;
             flex-direction: column;
-            flex-shrink: 0; /* Панель не сжимается на ПК */
         }
         .settings-panel h3 {
             color: #0f0;
@@ -122,7 +120,7 @@
             margin-top: auto;
         }
         button {
-            padding: 12px; /* Увеличили для удобного нажатия пальцем */
+            padding: 12px;
             border: 1px solid #0f0;
             border-radius: 5px;
             cursor: pointer;
@@ -132,39 +130,52 @@
             font-family: 'Courier New', monospace;
             transition: all 0.3s;
         }
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            border-color: #333;
+            color: #333;
+        }
         .btn-start { background: #0f0; color: #000; }
-        .btn-start:hover { background: #000; color: #0f0; box-shadow: 0 0 20px #0f0; }
+        .btn-start:hover:not(:disabled) { background: #000; color: #0f0; box-shadow: 0 0 20px #0f0; }
         .btn-pause { background: #0a0a0a; color: #0f0; }
-        .btn-pause:hover { background: #0f0; color: #000; }
+        .btn-pause:hover:not(:disabled) { background: #0f0; color: #000; }
         .btn-add { background: #0a0a0a; color: #0f0; }
-        .btn-add:hover { background: #0f0; color: #000; }
+        .btn-add:hover:not(:disabled) { background: #0f0; color: #000; }
         .btn-reset { background: #0a0a0a; color: #0f0; }
-        .btn-reset:hover { background: #0f0; color: #000; }
+        .btn-reset:hover:not(:disabled) { background: #0f0; color: #000; }
         .btn-back { background: #0a0a0a; color: #f00; border-color: #f00; }
-        .btn-back:hover { background: #f00; color: #000; }
+        .btn-back:hover:not(:disabled) { background: #f00; color: #000; }
 
-        /* АДАПТИВНОСТЬ ДЛЯ СМАРТФОНОВ И ПЛАНШЕТОВ */
-        @media (max-width: 850px) {
+        /* КРИТИЧЕСКИЙ МЕДИА-ЗАПРОС ДЛЯ СМАРТФОНОВ */
+        @media screen and (max-width: 850px) {
             body {
-                align-items: flex-start; /* Разрешаем скролл сверху вниз на телефонах */
-                overflow-y: auto;
+                align-items: flex-start;
+                overflow-y: auto !important;
             }
             .game-container {
-                flex-direction: column; /* Элементы встают друг под друга */
-                height: auto;
+                flex-direction: column !important;
+                height: auto !important;
                 gap: 15px;
             }
+            .game-area {
+                width: 100% !important;
+            }
+            #gameCanvas {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
             .settings-panel {
-                width: 100%; /* Панель настроек растягивается во всю ширину */
+                width: 100% !important;
+                margin-top: 10px;
             }
             .buttons {
-                display: grid;
-                grid-template-columns: 1fr 1fr; /* Кнопки теперь в два ряда, чтобы экономить место */
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
                 gap: 10px;
-                margin-top: 15px;
             }
             .btn-back {
-                grid-column: span 2; /* Кнопка Назад растягивается на всю ширину внизу */
+                grid-column: span 2 !important;
             }
         }
     </style>
@@ -193,8 +204,8 @@
             </div>
             
             <div class="setting-group">
-                <label>СКОРОСТЬ: <span id="baseSpeedValue">2</span></label>
-                <input type="range" id="baseSpeed" min="1" max="10" value="2" step="0.5">
+                <label>СКОРОСТЬ: <span id="baseSpeedValue">3</span></label>
+                <input type="range" id="baseSpeed" min="1" max="10" value="3" step="0.5">
             </div>
             
             <div class="setting-group">
@@ -217,7 +228,7 @@
             </div>
             
             <div class="stats">
-                <p>АКТИВНЫХ: <strong id="aliveBalls">5</strong></p>
+                <p>АКТИВНЫХ: <strong id="aliveBalls">0</strong></p>
                 <p>СЛЕДОВ: <strong id="totalTrails">0</strong></p>
                 <p>ВРЕМЯ: <strong id="gameTime">0:00</strong></p>
                 <p>СТАТУС: <strong id="gameStatus">НЕ НАЧАТА</strong></p>
@@ -228,104 +239,290 @@
                 <button class="btn-pause" id="pauseButton" onclick="togglePause()" disabled>⏸ ПАУЗА</button>
                 <button class="btn-add" id="addBallButton" onclick="addBall()" disabled>➕ ШАРИК</button>
                 <button class="btn-reset" onclick="resetGame()">🔄 ЗАНОВО</button>
-                <button class="btn-back" onclick="window.close()">← НАЗАД</button>
+                <button class="btn-back" onclick="window.history.back()">← НАЗАД</button>
             </div>
         </div>
     </div>
 
     <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    
-    let balls = [];
-    let isPaused = false;
-    let isGameStarted = false;
-    let animationId = null;
-    let gameTime = 0;
-    let gameTimer = null;
-    
-    const circleCenter = { x: canvas.width / 2, y: canvas.height / 2 };
-    const circleRadius = Math.min(canvas.width, canvas.height) / 2 - 50;
-    
-    // РАЗНОЦВЕТНЫЕ ШАРИКИ
-    const ballColors = [
-        '#ff4444', '#4444ff', '#44ff44', '#ffff44',
-        '#ff44ff', '#44ffff', '#ff8844', '#8844ff',
-        '#ff4488', '#88ff44', '#4488ff', '#ffaa00'
-    ];
-    
-    class TrailSegment {
-        constructor(collisionX, collisionY, ballRef) {
-            this.collisionX = collisionX;
-            this.collisionY = collisionY;
-            this.ballRef = ballRef;
-            this.width = 4;
-            this.life = 1;
-            this.isCut = false;
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let balls = [];
+        let trails = [];
+        let isPaused = false;
+        let isGameStarted = false;
+        let animationId = null;
+        let startTime = 0;
+        let totalElapsedSeconds = 0;
+        let gameTimer = null;
+        
+        const circleCenter = { x: canvas.width / 2, y: canvas.height / 2 };
+        const circleRadius = Math.min(canvas.width, canvas.height) / 2 - 40;
+        
+        const ballColors = [
+            '#ff4444', '#4444ff', '#44ff44', '#ffff44',
+            '#ff44ff', '#44ffff', '#ff8844', '#8844ff',
+            '#ff4488', '#88ff44', '#4488ff', '#ffaa00'
+        ];
+
+        // Привязка ползунков к выводу текста
+        const setupSlider = (id, valueId) => {
+            const slider = document.getElementById(id);
+            const display = document.getElementById(valueId);
+            slider.addEventListener('input', () => display.textContent = slider.value);
+        };
+        setupSlider('ballCount', 'ballCountValue');
+        setupSlider('ballSize', 'ballSizeValue');
+        setupSlider('baseSpeed', 'baseSpeedValue');
+        setupSlider('speedIncrement', 'speedIncrementValue');
+
+        class Ball {
+            constructor(x, y, radius, color, vx, vy) {
+                this.x = x;
+                this.y = y;
+                this.radius = radius;
+                this.color = color;
+                this.vx = vx;
+                this.vy = vy;
+            }
+
+    // МЕТОДЫ КЛАССА BALL И ФУНКЦИИ ЛОГИКИ ИГРЫ
+
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = this.color;
+        ctx.fill();
+        ctx.closePath();
+        ctx.shadowBlur = 0; // Сброс тени
+    }
+
+    update() {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Проверка столкновения с границей большого круга
+        const dx = this.x - circleCenter.x;
+        const dy = this.y - circleCenter.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance + this.radius >= circleRadius) {
+            // Направление от центра к шару (нормаль)
+            const nx = dx / distance;
+            const ny = dy / distance;
+
+            // Точка соприкосновения для следа
+            if (document.getElementById('showTrails').checked) {
+                trails.push({
+                    x: circleCenter.x + nx * circleRadius,
+                    y: circleCenter.y + ny * circleRadius,
+                    color: this.color,
+                    radius: 3,
+                    alpha: 1.0
+                });
+            }
+
+            // Отражение вектора скорости
+            const dotProduct = this.vx * nx + this.vy * ny;
+            this.vx = this.vx - 2 * dotProduct * nx;
+            this.vy = this.vy - 2 * dotProduct * ny;
+
+            // Ускорение шара при ударе об стену
+            const inc = parseFloat(document.getElementById('speedIncrement').value);
+            const currentSpeed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+            const newSpeed = currentSpeed + inc;
+            
+            this.vx = (this.vx / currentSpeed) * newSpeed;
+            this.vy = (this.vy / currentSpeed) * newSpeed;
+
+            // Выталкиваем шар внутрь круга, чтобы не застревал
+            this.x = circleCenter.x + nx * (circleRadius - this.radius - 1);
+            this.y = circleCenter.y + ny * (circleRadius - this.radius - 1);
         }
     }
+} // Конец класса Ball
 
-    // ФУНКЦИЯ ДЛЯ ТОЧНОГО ОПРЕДЕЛЕНИЯ КЛИКОВ НА ТЕЛЕФОНЕ И ПК
-    function getCanvasMousePos(canvas, event) {
-        const rect = canvas.getBoundingClientRect();
+function checkBallCollisions() {
+    if (!document.getElementById('collisionBetweenBalls').checked) return;
+
+    for (let i = 0; i < balls.length; i++) {
+        for (let j = i + 1; j < balls.length; j++) {
+            const b1 = balls[i];
+            const b2 = balls[j];
+
+            const dx = b2.x - b1.x;
+            const dy = b2.y - b1.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < b1.radius + b2.radius) {
+                // Простейший упругий отскок осей скорости
+                const nx = dx / dist;
+                const ny = dy / dist;
+                
+                const kx = b1.vx - b2.vx;
+                const ky = b1.vy - b2.vy;
+                const p = nx * kx + ny * ky;
+
+                        if (p > 0) {
+                            b1.vx -= nx * p;
+                            b1.vy -= ny * p;
+                            b2.vx += nx * p;
+                            b2.vy += ny * p;
+                        }
+                    }
+                }
+            }
+        }
+
+function gameLoop() {
+    if (isPaused || !isGameStarted) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 1. Рисуем большой ограничивающий круг
+    ctx.beginPath();
+    ctx.arc(circleCenter.x, circleCenter.y, circleRadius, 0, Math.PI * 2);
+    ctx.strokeStyle = '#0f0';
+    ctx.lineWidth = 3;
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = '#0f0';
+    ctx.stroke();
+    ctx.closePath();
+    ctx.shadowBlur = 0;
+
+    // 2. Рисуем и обновляем следы от ударов
+    for (let i = trails.length - 1; i >= 0; i--) {
+        const t = trails[i];
+        ctx.beginPath();
+        ctx.arc(t.x, t.y, t.radius, 0, Math.PI * 2);
+        ctx.fillStyle = t.color;
+        ctx.globalAlpha = t.alpha;
+        ctx.fill();
+        ctx.closePath();
         
-        // Поддержка касаний пальцем (touch) и мышки (click)
-        const clientX = event.touches && event.touches.length > 0 ? event.touches[0].clientX : event.clientX;
-        const clientY = event.touches && event.touches.length > 0 ? event.touches[0].clientY : event.clientY;
-        
-        // Масштабируем физические пиксели экрана в логические координаты canvas (700x600)
-        return {
-            x: (clientX - rect.left) * (canvas.width / rect.width),
-            y: (clientY - rect.top) * (canvas.height / rect.height)
-        };
+        t.alpha -= 0.005; // Следы плавно исчезают
+        if (t.alpha <= 0) trails.splice(i, 1);
     }
+    ctx.globalAlpha = 1.0; // Сброс прозрачности
 
-    // Слушатель клика для ПК
-    canvas.addEventListener('mousedown', function(e) {
-        const mousePos = getCanvasMousePos(canvas, e);
-        handleCanvasInteraction(mousePos.x, mousePos.y);
+    // 3. Обновляем и рисуем шары
+    balls.forEach(ball => {
+        ball.update();
+        ball.draw();
     });
 
-    // Слушатель касания для смартфонов
-    canvas.addEventListener('touchstart', function(e) {
-        // e.preventDefault(); // Раскомментируй, если экран телефона дергается при игре
-        const mousePos = getCanvasMousePos(canvas, e);
-        handleCanvasInteraction(mousePos.x, mousePos.y);
-    });
+    checkBallCollisions();
 
-    // В эту функцию перенеси логику, которая срабатывает при клике по игре
-    function handleCanvasInteraction(x, y) {
-        console.log("Клик/касание по координатам внутри игры:", x, y);
-        // Твой код взаимодействия с шариками...
+    // Обновление статистики
+    document.getElementById('aliveBalls').textContent = balls.length;
+    document.getElementById('totalTrails').textContent = trails.length;
+
+    animationId = requestAnimationFrame(gameLoop);
+}
+
+function updateTimer() {
+    totalElapsedSeconds++;
+    const mins = Math.floor(totalElapsedSeconds / 60);
+    const secs = totalElapsedSeconds % 60;
+    // Обернул шаблонную строку в правильные кавычки ` `
+    document.getElementById('gameTime').textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+}
+
+function startGame() {
+    if (isGameStarted) return;
+
+    isGameStarted = true;
+    isPaused = false;
+    document.getElementById('startOverlay').style.display = 'none';
+    document.getElementById('gameOver').style.display = 'none';
+    document.getElementById('gameStatus').textContent = 'ИГРАЕТ';
+    
+    document.getElementById('startButton').disabled = true;
+    document.getElementById('pauseButton').disabled = false;
+    document.getElementById('addBallButton').disabled = false;
+
+    // Генерация начальных шаров
+    const count = parseInt(document.getElementById('ballCount').value);
+    const radius = parseInt(document.getElementById('ballSize').value);
+    const speed = parseFloat(document.getElementById('baseSpeed').value);
+
+    balls = [];
+    trails = [];
+    for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 / count) * i;
+        const x = circleCenter.x + Math.cos(angle) * 30;
+        const y = circleCenter.y + Math.sin(angle) * 30;
+        
+        const moveAngle = Math.random() * Math.PI * 2;
+        const vx = Math.cos(moveAngle) * speed;
+        const vy = Math.sin(moveAngle) * speed;
+        const color = ballColors[i % ballColors.length];
+
+        balls.push(new Ball(x, y, radius, color, vx, vy));
     }
 
+    totalElapsedSeconds = 0;
+    clearInterval(gameTimer);
+    gameTimer = setInterval(updateTimer, 1000);
 
-    /* ================================================================= */
-    /* ТВОЯ ОРИГИНАЛЬНАЯ ЛОГИКА ИГРЫ (Вставь свои старые функции сюда) */
-    /* ================================================================= */
+    gameLoop();
+}
 
-    function startGame() {
-        console.log("Старт игры");
-        // Вставь сюда свой оригинальный код запуска игры...
+function togglePause() {
+    if (!isGameStarted) return;
+    isPaused = !isPaused;
+    
+    const btn = document.getElementById('pauseButton');
+    if (isPaused) {
+        btn.textContent = '▶ ПРОДОЛЖИТЬ';
+        document.getElementById('gameStatus').textContent = 'ПАУЗА';
+        clearInterval(gameTimer);
+        cancelAnimationFrame(animationId);
+    } else {
+        btn.textContent = '⏸ ПАУЗА';
+        document.getElementById('gameStatus').textContent = 'ИГРАЕТ';
+        gameTimer = setInterval(updateTimer, 1000);
+        gameLoop();
     }
+}
 
-    function togglePause() {
-        console.log("Пауза");
-        // Вставь сюда свой оригинальный код паузы...
-    }
+function addBall() {
+    if (!isGameStarted) return;
+    const radius = parseInt(document.getElementById('ballSize').value);
+    const speed = parseFloat(document.getElementById('baseSpeed').value);
+    const color = ballColors[balls.length % ballColors.length];
 
-    function addBall() {
-        console.log("Добавлен шар");
-        // Вставь сюда свой оригинальный код добавления шарика...
-    }
+    const moveAngle = Math.random() * Math.PI * 2;
+    const vx = Math.cos(moveAngle) * speed;
+    const vy = Math.sin(moveAngle) * speed;
 
-    function resetGame() {
-        console.log("Сброс");
-        // Вставь сюда свой оригинальный код перезапуска...
-    }
+    balls.push(new Ball(circleCenter.x, circleCenter.y, radius, color, vx, vy));
+}
 
-    // Вставь сюда игровой цикл (update, draw, requestAnimationFrame и т.д.)
+function resetGame() {
+    cancelAnimationFrame(animationId);
+    clearInterval(gameTimer);
+    isGameStarted = false;
+    isPaused = false;
+    balls = [];
+    trails = [];
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    document.getElementById('startOverlay').style.display = 'block';
+    document.getElementById('gameOver').style.display = 'none';
+    document.getElementById('gameStatus').textContent = 'НЕ НАЧАТА';
+    document.getElementById('gameTime').textContent = '0:00';
+    document.getElementById('aliveBalls').textContent = '0';
+    document.getElementById('totalTrails').textContent = '0';
+
+    document.getElementById('startButton').disabled = false;
+    document.getElementById('pauseButton').disabled = true;
+    document.getElementById('addBallButton').disabled = true;
+    document.getElementById('pauseButton').textContent = '⏸ ПАУЗА';
+}
 </script>
-
 </body>
 </html>

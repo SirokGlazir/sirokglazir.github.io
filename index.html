@@ -57,6 +57,7 @@
 
         /* КНОПКА МИНИ-ИГР */
         /* КНОПКА МИНИ-ИГР В ЛЕВОМ ВЕРХНЕМ УГЛУ */
+/* КНОПКА МИНИ-ИГР В ЛЕВОМ ВЕРХНЕМ УГЛУ */
 .btn-minigames {
     position: fixed;
     top: 20px;
@@ -74,12 +75,18 @@
     z-index: 55;
     text-transform: uppercase;
     letter-spacing: 1px;
+    margin: 0;
 }
 .btn-minigames:hover {
     background: #fff;
     color: #000;
     box-shadow: 0 0 25px rgba(255, 255, 255, 0.5);
     transform: scale(1.05);
+}
+
+/* Отступ для первой карточки, чтобы не слипалась с кнопкой */
+#screen-info {
+    padding-top: 80px !important;
 }
         @keyframes pulse {
             0%, 100% { transform: scale(1); }

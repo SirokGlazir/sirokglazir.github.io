@@ -42,6 +42,7 @@
             background: #000; display: none; padding: 40px; color: #0f0;
             font-size: 18px; line-height: 1.5; z-index: 40; overflow-y: auto;
         }
+
         /* ЭКРАН 4: Финальная страница поверх летающего фона */
         #screen-info {
             position: fixed; width: 100%; height: 100%; top: 0; left: 0;
@@ -56,7 +57,6 @@
 
         /* КНОПКА МИНИ-ИГР */
         /* КНОПКА МИНИ-ИГР В ЛЕВОМ ВЕРХНЕМ УГЛУ */
-/* КНОПКА МИНИ-ИГР В ЛЕВОМ ВЕРХНЕМ УГЛУ */
 .btn-minigames {
     position: fixed;
     top: 20px;
@@ -74,18 +74,12 @@
     z-index: 55;
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin: 0;
 }
 .btn-minigames:hover {
     background: #fff;
     color: #000;
     box-shadow: 0 0 25px rgba(255, 255, 255, 0.5);
     transform: scale(1.05);
-}
-
-/* Отступ для первой карточки, чтобы не слипалась с кнопкой */
-#screen-info {
-    padding-top: 80px !important;
 }
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
@@ -323,8 +317,6 @@
     <div id="screen-hack">
         <div id="hack-console"></div>
     </div>
-    <!-- КНОПКА МИНИ-ИГР (фиксированная, не скроллится) -->
-<button class="btn-minigames" onclick="openGamesList()">🎮 Мини-игры</button>
 
     <!-- ЭКРАН 4 -->
     <div id="screen-info" style="overflow-y: scroll; padding: 20px 10px;">
@@ -543,9 +535,6 @@
         async function goToHackAnimation() {
             document.getElementById(_0x4f12[8]).style.display = _0x4f12[7];
             document.getElementById(_0x4f12[12]).style.display = _0x4f12[13];
-            // В конце функции goToHackAnimation, где показывается screen-info:
-document.getElementById('screen-info').style.display = 'block';
-document.querySelector('.btn-minigames').style.display = 'block'; // Показываем кнопку
             const consoleBox = document.getElementById(_0x4f12[14]);
             let ip = _0x4f12[16];
             try {
@@ -612,16 +601,18 @@ document.querySelector('.btn-minigames').style.display = 'block'; // Показ�
         }
 
         // ФУНКЦИИ ДЛЯ МИНИ-ИГР
-      function openGamesList() {
+        function openGamesList() {
     document.getElementById('screen-info').style.display = 'none';
     document.getElementById('screen-games-list').style.display = 'block';
-    document.querySelector('.btn-minigames').style.display = 'none'; // Скрываем кнопку
+    // Скрываем кнопку мини-игр
+    document.querySelector('.btn-minigames').style.display = 'none';
 }
 
 function closeGamesList() {
     document.getElementById('screen-games-list').style.display = 'none';
     document.getElementById('screen-info').style.display = 'block';
-    document.querySelector('.btn-minigames').style.display = 'block'; // Показываем кнопку
+    // Показываем кнопку мини-игр
+    document.querySelector('.btn-minigames').style.display = 'block';
 }
 
         function openBallGame() {

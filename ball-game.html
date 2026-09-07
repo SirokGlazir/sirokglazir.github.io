@@ -131,7 +131,7 @@
             transition: all 0.3s;
         }
         button:disabled {
-            opacity: 0.4;
+            opacity: 0.3;
             cursor: not-allowed;
             border-color: #333;
             color: #333;
@@ -147,7 +147,6 @@
         .btn-back { background: #0a0a0a; color: #f00; border-color: #f00; }
         .btn-back:hover:not(:disabled) { background: #f00; color: #000; }
 
-        /* КРИТИЧЕСКИЙ МЕДИА-ЗАПРОС ДЛЯ СМАРТФОНОВ */
         @media screen and (max-width: 850px) {
             body {
                 align-items: flex-start;
@@ -245,12 +244,6 @@
     </div>
 
     <script>
-        </style>
-</head>
-<body>
-    <!-- (Тут идет твоя HTML-верстка с контейнерами, кнопками и canvas) -->
-
-    <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
@@ -258,9 +251,8 @@
         let trails = [];
         let isPaused = false;
         let isGameStarted = false;
-        let isProtectedTime = false; // Флаг первых 5 секунд защиты следов
+        let isProtectedTime = false; 
         let animationId = null;
-        let startTime = 0;
         let totalElapsedSeconds = 0;
         let gameTimer = null;
         
@@ -273,7 +265,6 @@
             '#ff4488', '#88ff44', '#4488ff', '#ffaa00'
         ];
 
-        // Функция для динамического обновления шаров на экране при изменении ползунков до старта
         function handleSliderChange() {
             if (!isGameStarted) {
                 initInitialBalls();
@@ -281,7 +272,6 @@
             }
         }
 
-        // Привязка ползунков к выводу текста и к обработчику изменений
         const setupSlider = (id, valueId) => {
             const slider = document.getElementById(id);
             const display = document.getElementById(valueId);
@@ -298,116 +288,219 @@
         class Ball {
             constructor(x, y, radius, color, vx, vy) {
                 this.x = x;
-                this.y = y;
-                this.radius = radius;
-                this.color = color;
-                this.vx = vx;
-                this.vy = vy;
+                        this.y = y;
+        this.radius = radius;
+        this.color = color;
+        this.vx = vx;
+        this.vy = vy;
+    }
+
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = this.color;
+        ctx.fill();
+        ctx.closePath();
+        ctx.shadowBlur = 0;
+    }
+
+    update() {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        const dx = this.x - circleCenter.x;
+        const dy = this.y - circleCenter.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance + this.radius >= circleRadius) {
+            const nx = dx / distance;
+            const ny = dy / distance;
+
+            if (document.getElementById('showTrails').checked) {
+                trails.push({
+                    x: circleCenter.x + nx * circleRadius,
+                    y: circleCenter.y + ny * circleRadius,
+                    color: this.color,
+                    radius: 3,
+                    alpha: 1.0
+                });
             }
 
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = this.color;
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = this.color;
-                ctx.fill();
-                ctx.closePath();
-                ctx.shadowBlur = 0;
-            }
+            const dotProduct = this.vx * nx + this.vy * ny;
+            this.vx = this.vx - 2 * dotProduct * nx;
+            this.vy = this.vy - 2 * dotProduct * ny;
 
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
+            const inc = parseFloat(document.getElementById('speedIncrement').value);
+            const currentSpeed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+            const newSpeed = currentSpeed + inc;
+            
+            this.vx = (this.vx / currentSpeed) * newSpeed;
+            this.vy = (this.vy / currentSpeed) * newSpeed;
 
-                const dx = this.x - circleCenter.x;
-                const dy = this.y - circleCenter.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
+            this.x = circleCenter.x + nx * (circleRadius - this.radius - 1);
+            this.y = circleCenter.y + ny * (circleRadius - this.radius - 1);
+        }
+    }
+}
 
-                if (distance + this.radius >= circleRadius) {
-                    const nx = dx / distance;
-                    const ny = dy / distance;
+function initInitialBalls() {
+    const count = parseInt(document.getElementById('ballCount').value);
+    const radius = parseInt(document.getElementById('ballSize').value);
+    const speed = parseFloat(document.getElementById('baseSpeed').value);
 
-                    // Спавним неоновый след при ударе
-                    if (document.getElementById('showTrails').checked) {
-                        trails.push({
-                            x: circleCenter.x + nx * circleRadius,
-                            y: circleCenter.y + ny * circleRadius,
-                            color: this.color,
-                            radius: 3,
-                            alpha: 1.0
-                        });
-                    }
+    balls = [];
+    for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 / count) * i;
+        const spawnRadius = 100;
+        const x = circleCenter.x + Math.cos(angle) * spawnRadius;
+        const y = circleCenter.y + Math.sin(angle) * spawnRadius;
 
-                    const dotProduct = this.vx * nx + this.vy * ny;
-                    this.vx = this.vx - 2 * dotProduct * nx;
-                    this.vy = this.vy - 2 * dotProduct * ny;
+        const moveAngle = Math.random() * Math.PI * 2;
+        const vx = Math.cos(moveAngle) * speed;
+        const vy = Math.sin(moveAngle) * speed;
+        const color = ballColors[i % ballColors.length];
 
-                    const inc = parseFloat(document.getElementById('speedIncrement').value);
-                    const currentSpeed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-                    const newSpeed = currentSpeed + inc;
-                    
-                    this.vx = (this.vx / currentSpeed) * newSpeed;
-                    this.vy = (this.vy / currentSpeed) * newSpeed;
+        balls.push(new Ball(x, y, radius, color, vx, vy));
+    }
+}
 
-                    this.x = circleCenter.x + nx * (circleRadius - this.radius - 1);
-                    this.y = circleCenter.y + ny * (circleRadius - this.radius - 1);
+function drawInitialState() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.beginPath();
+    ctx.arc(circleCenter.x, circleCenter.y, circleRadius, 0, Math.PI * 2);
+    ctx.strokeStyle = '#0f0';
+    ctx.lineWidth = 3;
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = '#0f0';
+    ctx.stroke();
+    ctx.closePath();
+    ctx.shadowBlur = 0;
+
+    balls.forEach(ball => ball.draw());
+    document.getElementById('aliveBalls').textContent = balls.length;
+}function checkBallCollisions() {
+    if (!document.getElementById('collisionBetweenBalls').checked) return;
+
+    for (let i = 0; i < balls.length; i++) {
+        for (let j = i + 1; j < balls.length; j++) {
+            const b1 = balls[i];
+            const b2 = balls[j];
+
+            const dx = b2.x - b1.x;
+            const dy = b2.y - b1.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < b1.radius + b2.radius) {
+                const nx = dx / dist;
+                const ny = dy / dist;
+                
+                const kx = b1.vx - b2.vx;
+                const ky = b1.vy - b2.vy;
+                const p = nx * kx + ny * ky;
+
+                if (p > 0) {
+                    b1.vx -= nx * p;
+                    b1.vy -= ny * p;
+                    b2.vx += nx * p;
+                    b2.vy += ny * p;
                 }
             }
         }
+    }
+}
 
-        // Генерация шаров строго по кругу
-        function initInitialBalls() {
-            const count = parseInt(document.getElementById('ballCount').value);
-            const radius = parseInt(document.getElementById('ballSize').value);
-            const speed = parseFloat(document.getElementById('baseSpeed').value);
+function gameLoop() {
+    if (isPaused || !isGameStarted) return;
 
-            balls = [];
-            for (let i = 0; i < count; i++) {
-                // Распределяем углы равномерно, чтобы получился идеальный круг
-                const angle = (Math.PI * 2 / count) * i;
-                
-                // Спавним шары на окружности радиуса 100px вокруг центра
-                const spawnRadius = 100; 
-                const x = circleCenter.x + Math.cos(angle) * spawnRadius;
-                const y = circleCenter.y + Math.sin(angle) * spawnRadius;
-                
-                const moveAngle = Math.random() * Math.PI * 2;
-                const vx = Math.cos(moveAngle) * speed;
-                const vy = Math.sin(moveAngle) * speed;
-                const color = ballColors[i % ballColors.length];
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                balls.push(new Ball(x, y, radius, color, vx, vy));
-            }
-        }
+    ctx.beginPath();
+    ctx.arc(circleCenter.x, circleCenter.y, circleRadius, 0, Math.PI * 2);
+    ctx.strokeStyle = '#0f0';
+    ctx.lineWidth = 3;
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = '#0f0';
+    ctx.stroke();
+    ctx.closePath();
+    ctx.shadowBlur = 0;
 
-        // Отрисовка начального статического состояния на холсте до нажатия старта
-        function drawInitialState() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = trails.length - 1; i >= 0; i--) {
+        const t = trails[i];
+        ctx.beginPath();
+        ctx.arc(t.x, t.y, t.radius, 0, Math.PI * 2);
+        ctx.fillStyle = t.color;
+        ctx.globalAlpha = t.alpha;
+        ctx.fill();
+        ctx.closePath();
+        
+        t.alpha -= 0.005;
+        if (t.alpha <= 0) trails.splice(i, 1);
+    }
+    ctx.globalAlpha = 1.0;
 
-            // Большой зеленый круг
-            ctx.beginPath();
-            ctx.arc(circleCenter.x, circleCenter.y, circleRadius, 0, Math.PI * 2);
-            ctx.strokeStyle = '#0f0';
-            ctx.lineWidth = 3;
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = '#0f0';
-            ctx.stroke();
-            ctx.closePath();
-            ctx.shadowBlur = 0;
+    balls.forEach(ball => {
+        ball.update();
+        ball.draw();
+    });
 
-            // Рисуем заспавненные шары в статике
-            balls.forEach(ball => ball.draw());
+    checkBallCollisions();
 
-            // Статистика по умолчанию
-            document.getElementById('aliveBalls').textContent = balls.length;
-        }
-                document.getElementById('gameStatus').textContent = 'ПАУЗА';
+    document.getElementById('aliveBalls').textContent = balls.length;
+    document.getElementById('totalTrails').textContent = trails.length;
+
+    animationId = requestAnimationFrame(gameLoop);
+}
+
+function updateTimer() {
+    totalElapsedSeconds++;
+
+    if (totalElapsedSeconds >= 5) {
+        isProtectedTime = false;
+        document.getElementById('gameStatus').textContent = 'ИГРАЕТ';
+    }
+
+    const mins = Math.floor(totalElapsedSeconds / 60);
+    const secs = totalElapsedSeconds % 60;
+    document.getElementById('gameTime').textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+}
+        function startGame() {
+    if (isGameStarted) return;
+
+    isGameStarted = true;
+    isPaused = false;
+    isProtectedTime = true; 
+
+    document.getElementById('startOverlay').style.display = 'none';
+    document.getElementById('gameOver').style.display = 'none';
+    document.getElementById('gameStatus').textContent = 'ЗАЩИТА (5с)';
+
+    document.getElementById('startButton').disabled = true;
+    document.getElementById('pauseButton').disabled = false;
+    document.getElementById('addBallButton').disabled = false;
+
+    totalElapsedSeconds = 0;
+    clearInterval(gameTimer);
+    gameTimer = setInterval(updateTimer, 1000);
+
+    gameLoop();
+}
+
+function togglePause() {
+    if (!isGameStarted) return;
+    isPaused = !isPaused;
+
+    const btn = document.getElementById('pauseButton');
+    if (isPaused) {
+        btn.textContent = '▶ ПРОДОЛЖИТЬ';
+        document.getElementById('gameStatus').textContent = 'ПАУЗА';
         clearInterval(gameTimer);
         cancelAnimationFrame(animationId);
     } else {
         btn.textContent = '⏸ ПАУЗА';
-        document.getElementById('gameStatus').textContent = isProtectedTime ? 'ИГРАЕТ (ЗАЩИТА)' : 'ИГРАЕТ';
+        document.getElementById('gameStatus').textContent = isProtectedTime ? 'ЗАЩИТА (5с)' : 'ИГРАЕТ';
         gameTimer = setInterval(updateTimer, 1000);
         gameLoop();
     }
@@ -432,30 +525,30 @@ function resetGame() {
     isGameStarted = false;
     isPaused = false;
     isProtectedTime = false;
-    
-    trails = []; // Очищаем старые следы
-    initInitialBalls(); // Пересоздаем начальные шары по кругу
-    drawInitialState(); // Отрисовываем их на холсте в статике
-    
+
+    trails = [];
+    initInitialBalls();
+    drawInitialState();
+
     document.getElementById('startOverlay').style.display = 'block';
     document.getElementById('gameOver').style.display = 'none';
     document.getElementById('gameStatus').textContent = 'НЕ НАЧАТА';
     document.getElementById('gameTime').textContent = '0:00';
     document.getElementById('totalTrails').textContent = '0';
-    
+
     document.getElementById('startButton').disabled = false;
     document.getElementById('pauseButton').disabled = true;
     document.getElementById('addBallButton').disabled = true;
     document.getElementById('pauseButton').textContent = '⏸ ПАУЗА';
 }
 
-// Запуск спавна и отрисовки шаров сразу при загрузке страницы пользователем
 window.onload = function() {
     initInitialBalls();
     drawInitialState();
 };
-
-
 </script>
 </body>
 </html>
+
+
+

@@ -57,8 +57,9 @@
 
         /* КНОПКА МИНИ-ИГР */
         /* КНОПКА МИНИ-ИГР В ЛЕВОМ ВЕРХНЕМ УГЛУ */
+/* КНОПКА МИНИ-ИГР В ЛЕВОМ ВЕРХНЕМ УГЛУ (Адаптивная) */
 .btn-minigames {
-    position: fixed;
+    position: absolute; /* Меняем fixed на absolute, чтобы она зависела от экрана */
     top: 20px;
     left: 20px;
     padding: 12px 25px;
@@ -75,6 +76,18 @@
     text-transform: uppercase;
     letter-spacing: 1px;
 }
+
+/* Специальное правило для мобильных экранов */
+@media (max-width: 768px) {
+    .btn-minigames {
+        position: relative; /* На мобилках кнопка встает в общий поток */
+        top: 0;
+        left: 0;
+        display: inline-block;
+        margin: 20px auto 0 auto; /* Центрируем и делаем отступ снизу */
+    }
+}
+
 .btn-minigames:hover {
     background: #fff;
     color: #000;

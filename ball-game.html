@@ -234,42 +234,98 @@
     </div>
 
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        let balls = [];
-        let isPaused = false;
-        let isGameStarted = false;
-        let animationId = null;
-        let gameTime = 0;
-        let gameTimer = null;
-        
-        const circleCenter = { x: canvas.width / 2, y: canvas.height / 2 };
-        const circleRadius = Math.min(canvas.width, canvas.height) / 2 - 50;
-        
-        // РАЗНОЦВЕТНЫЕ ШАРИКИ
-        const ballColors = [
-            '#ff4444', '#4444ff', '#44ff44', '#ffff44',
-            '#ff44ff', '#44ffff', '#ff8844', '#8844ff',
-            '#ff4488', '#88ff44', '#4488ff', '#ffaa00'
-        ];
-        
-        class TrailSegment {
-            constructor(collisionX, collisionY, ballRef) {
-                this.collisionX = collisionX;
-                this.collisionY = collisionY;
-                this.ballRef = ballRef;
-                this.width = 4;
-                this.life = 1;
-                this.isCut = false;
-            }
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    let balls = [];
+    let isPaused = false;
+    let isGameStarted = false;
+    let animationId = null;
+    let gameTime = 0;
+    let gameTimer = null;
+    
+    const circleCenter = { x: canvas.width / 2, y: canvas.height / 2 };
+    const circleRadius = Math.min(canvas.width, canvas.height) / 2 - 50;
+    
+    // РАЗНОЦВЕТНЫЕ ШАРИКИ
+    const ballColors = [
+        '#ff4444', '#4444ff', '#44ff44', '#ffff44',
+        '#ff44ff', '#44ffff', '#ff8844', '#8844ff',
+        '#ff4488', '#88ff44', '#4488ff', '#ffaa00'
+    ];
+    
+    class TrailSegment {
+        constructor(collisionX, collisionY, ballRef) {
+            this.collisionX = collisionX;
+            this.collisionY = collisionY;
+            this.ballRef = ballRef;
+            this.width = 4;
+            this.life = 1;
+            this.isCut = false;
         }
+    }
 
-        // Заглушки функций, чтобы код не выдавал ошибку (допиши сюда свою логику игры)
-        function startGame() { console.log("Старт игры"); }
-        function togglePause() { console.log("Пауза"); }
-        function addBall() { console.log("Добавлен шар"); }
-        function resetGame() { console.log("Сброс"); }
-    </script>
+    // ФУНКЦИЯ ДЛЯ ТОЧНОГО ОПРЕДЕЛЕНИЯ КЛИКОВ НА ТЕЛЕФОНЕ И ПК
+    function getCanvasMousePos(canvas, event) {
+        const rect = canvas.getBoundingClientRect();
+        
+        // Поддержка касаний пальцем (touch) и мышки (click)
+        const clientX = event.touches && event.touches.length > 0 ? event.touches[0].clientX : event.clientX;
+        const clientY = event.touches && event.touches.length > 0 ? event.touches[0].clientY : event.clientY;
+        
+        // Масштабируем физические пиксели экрана в логические координаты canvas (700x600)
+        return {
+            x: (clientX - rect.left) * (canvas.width / rect.width),
+            y: (clientY - rect.top) * (canvas.height / rect.height)
+        };
+    }
+
+    // Слушатель клика для ПК
+    canvas.addEventListener('mousedown', function(e) {
+        const mousePos = getCanvasMousePos(canvas, e);
+        handleCanvasInteraction(mousePos.x, mousePos.y);
+    });
+
+    // Слушатель касания для смартфонов
+    canvas.addEventListener('touchstart', function(e) {
+        // e.preventDefault(); // Раскомментируй, если экран телефона дергается при игре
+        const mousePos = getCanvasMousePos(canvas, e);
+        handleCanvasInteraction(mousePos.x, mousePos.y);
+    });
+
+    // В эту функцию перенеси логику, которая срабатывает при клике по игре
+    function handleCanvasInteraction(x, y) {
+        console.log("Клик/касание по координатам внутри игры:", x, y);
+        // Твой код взаимодействия с шариками...
+    }
+
+
+    /* ================================================================= */
+    /* ТВОЯ ОРИГИНАЛЬНАЯ ЛОГИКА ИГРЫ (Вставь свои старые функции сюда) */
+    /* ================================================================= */
+
+    function startGame() {
+        console.log("Старт игры");
+        // Вставь сюда свой оригинальный код запуска игры...
+    }
+
+    function togglePause() {
+        console.log("Пауза");
+        // Вставь сюда свой оригинальный код паузы...
+    }
+
+    function addBall() {
+        console.log("Добавлен шар");
+        // Вставь сюда свой оригинальный код добавления шарика...
+    }
+
+    function resetGame() {
+        console.log("Сброс");
+        // Вставь сюда свой оригинальный код перезапуска...
+    }
+
+    // Вставь сюда игровой цикл (update, draw, requestAnimationFrame и т.д.)
+</script>
+
 </body>
 </html>

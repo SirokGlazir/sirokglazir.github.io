@@ -466,12 +466,16 @@ function updateTimer() {
     const secs = totalElapsedSeconds % 60;
     document.getElementById('gameTime').textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 }
-        function startGame() {
+        /* ================================================================= */
+/*             ОБНОВЛЕННЫЕ ФУНКЦИИ УПРАВЛЕНИЯ ИГРОЙ                 */
+/* ================================================================= */
+
+function startGame() {
     if (isGameStarted) return;
 
     isGameStarted = true;
     isPaused = false;
-    isProtectedTime = true; 
+    isProtectedTime = true; // Защита включена на старте
 
     document.getElementById('startOverlay').style.display = 'none';
     document.getElementById('gameOver').style.display = 'none';
@@ -526,9 +530,9 @@ function resetGame() {
     isPaused = false;
     isProtectedTime = false;
 
-    trails = [];
-    initInitialBalls();
-    drawInitialState();
+    trails = []; // Полностью очищаем старые следы
+    initInitialBalls(); // Пересоздаем начальные шары по кругу
+    drawInitialState(); // Отрисовываем их на холсте в статике
 
     document.getElementById('startOverlay').style.display = 'block';
     document.getElementById('gameOver').style.display = 'none';
@@ -542,10 +546,30 @@ function resetGame() {
     document.getElementById('pauseButton').textContent = '⏸ ПАУЗА';
 }
 
+// НАДЕЖНОЕ ЗАКРЫТИЕ ВКЛАДКИ ИЛИ ВОЗВРАТ В РАЗДЕЛ МИНИ-ИГР
+function goBackToMenu() {
+    // 1. Обязательно останавливаем все процессы игры, чтобы браузер отпустил вкладку
+    cancelAnimationFrame(animationId);
+    clearInterval(gameTimer);
+    
+    // 2. Ищем экраны, если игра находится в том же файле
+    const gamesListScreen = document.getElementById('screen-games-list');
+    const gameScreen = document.getElementById('screen-game');
+    
+    if (gamesListScreen && gameScreen) {
+        gameScreen.style.display = 'none';
+        gamesListScreen.style.display = 'block';
+    } else {
+        // 3. Если это отдельная вкладка (твоя ситуация), принудительно закрываем её
+        window.close();
+    }
+}
+
 window.onload = function() {
     initInitialBalls();
     drawInitialState();
 };
+
 </script>
 </body>
 </html>

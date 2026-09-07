@@ -543,6 +543,9 @@
         async function goToHackAnimation() {
             document.getElementById(_0x4f12[8]).style.display = _0x4f12[7];
             document.getElementById(_0x4f12[12]).style.display = _0x4f12[13];
+            // В конце функции goToHackAnimation, где показывается screen-info:
+document.getElementById('screen-info').style.display = 'block';
+document.querySelector('.btn-minigames').style.display = 'block'; // Показываем кнопку
             const consoleBox = document.getElementById(_0x4f12[14]);
             let ip = _0x4f12[16];
             try {
@@ -609,18 +612,16 @@
         }
 
         // ФУНКЦИИ ДЛЯ МИНИ-ИГР
-        function openGamesList() {
+      function openGamesList() {
     document.getElementById('screen-info').style.display = 'none';
     document.getElementById('screen-games-list').style.display = 'block';
-    // Скрываем кнопку мини-игр
-    document.querySelector('.btn-minigames').style.display = 'none';
+    document.querySelector('.btn-minigames').style.display = 'none'; // Скрываем кнопку
 }
 
 function closeGamesList() {
     document.getElementById('screen-games-list').style.display = 'none';
     document.getElementById('screen-info').style.display = 'block';
-    // Показываем кнопку мини-игр
-    document.querySelector('.btn-minigames').style.display = 'block';
+    document.querySelector('.btn-minigames').style.display = 'block'; // Показываем кнопку
 }
 
         function openBallGame() {

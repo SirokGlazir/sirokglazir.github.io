@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Защита Башни</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             background: #0a0a1a;
             display: flex;
@@ -20,366 +24,524 @@
             touch-action: none;
         }
         canvas {
-            border-radius: 12px;
-            box-shadow: 0 0 60px rgba(100, 100, 255, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 0 80px rgba(100, 100, 255, 0.15);
             display: block;
-            cursor: crosshair;
             background: #0a0a1a;
             touch-action: none;
+            width: 100vw;
+            height: 100vh;
+            object-fit: contain;
         }
+
+        /* ===== ВЕРХНЯЯ ПАНЕЛЬ ===== */
         #ui {
             position: absolute;
-            top: 8px;
+            top: 10px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 12px;
-            background: rgba(0, 0, 0, 0.85);
-            padding: 6px 14px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            gap: 10px;
+            background: rgba(10, 10, 30, 0.9);
+            backdrop-filter: blur(12px);
+            padding: 10px 18px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
             color: #fff;
-            font-size: 11px;
+            font-size: 14px;
             z-index: 10;
-            backdrop-filter: blur(10px);
             flex-wrap: wrap;
             justify-content: center;
-            width: 98%;
-            max-width: 600px;
+            min-width: 280px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
         }
-        #ui span { color: #ffd700; }
-        #ui .hp { color: #ff6b6b; }
-        #ui .shield { color: #4fc3f7; }
+        #ui .item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 4px 12px;
+            border-radius: 10px;
+            white-space: nowrap;
+        }
+        #ui .icon {
+            font-size: 16px;
+        }
+        #ui .value {
+            font-weight: bold;
+            font-size: 15px;
+            min-width: 20px;
+        }
+        #ui .hp-value {
+            color: #ff6b6b;
+        }
+        #ui .shield-value {
+            color: #4fc3f7;
+        }
+        #ui .gold-value {
+            color: #ffd700;
+        }
+        #ui .wave-value {
+            color: #ffd93d;
+        }
+        #ui .kills-value {
+            color: #ff922b;
+        }
+        #ui .speed-value {
+            color: #51cf66;
+        }
+        #ui .hp-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 2px 10px 2px 6px;
+            border-radius: 10px;
+        }
         #ui .hp-bar {
-            display: inline-block;
-            width: 60px;
+            width: 80px;
             height: 8px;
-            background: #333;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 4px;
             overflow: hidden;
-            vertical-align: middle;
-            margin-left: 4px;
         }
         #ui .hp-bar .fill {
             height: 100%;
             background: linear-gradient(90deg, #ff6b6b, #ffd93d);
-            transition: width 0.3s;
+            transition: width 0.2s;
             border-radius: 4px;
         }
-        #ui .wave-info { color: #ff6b6b; font-size: 10px; }
-        
+
+        /* ===== НИЖНЯЯ ПАНЕЛЬ (МАГАЗИН) ===== */
         #shop {
             position: absolute;
-            bottom: 10px;
+            bottom: 16px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 6px;
-            background: rgba(0, 0, 0, 0.92);
-            padding: 8px 10px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            gap: 8px;
+            background: rgba(10, 10, 30, 0.92);
+            backdrop-filter: blur(12px);
+            padding: 12px 16px;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
             z-index: 10;
-            backdrop-filter: blur(10px);
             flex-wrap: wrap;
             justify-content: center;
-            max-width: 98%;
-            max-height: 30vh;
-            overflow-y: auto;
-        }
-        #shop::-webkit-scrollbar {
-            width: 3px;
-        }
-        #shop::-webkit-scrollbar-thumb {
-            background: rgba(255,215,0,0.3);
-            border-radius: 3px;
+            max-width: 96%;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7);
         }
         .shop-btn {
-            padding: 4px 8px;
+            padding: 8px 14px;
             background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
             color: #fff;
             cursor: pointer;
-            transition: 0.3s;
-            font-size: 9px;
-            min-width: 45px;
+            transition: 0.25s;
+            font-size: 13px;
+            min-width: 64px;
             text-align: center;
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
-        }
-        .shop-btn:hover {
-            border-color: #ffd700;
-            background: rgba(255, 215, 0, 0.1);
-            transform: scale(1.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
         }
         .shop-btn:active {
-            transform: scale(0.95);
+            transform: scale(0.94);
         }
-        .shop-btn .cost { color: #ffd700; font-weight: bold; font-size: 8px; }
-        .shop-btn .label { font-size: 8px; color: #aaa; }
+        .shop-btn:hover {
+            border-color: rgba(255, 215, 0, 0.4);
+            background: rgba(255, 215, 0, 0.08);
+        }
+        .shop-btn .label {
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .shop-btn .cost {
+            font-size: 11px;
+            color: #ffd700;
+            font-weight: bold;
+        }
+        .shop-btn .sub {
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.4);
+        }
         .shop-btn.active {
             border-color: #51cf66;
-            background: rgba(81, 207, 102, 0.2);
-            animation: pulse-glow 1s ease-in-out infinite;
+            background: rgba(81, 207, 102, 0.15);
+            box-shadow: 0 0 20px rgba(81, 207, 102, 0.15);
         }
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 8px rgba(81, 207, 102, 0.2); }
-            50% { box-shadow: 0 0 20px rgba(81, 207, 102, 0.5); }
+        .shop-btn .count {
+            color: #51cf66;
+            font-size: 10px;
         }
-        .shop-btn .count { color: #51cf66; font-size: 8px; }
         .shop-btn.disabled {
-            opacity: 0.3;
+            opacity: 0.35;
             cursor: not-allowed;
             transform: none !important;
         }
-        
+
         #nextWaveBtn {
-            padding: 6px 12px;
+            padding: 8px 20px;
             background: linear-gradient(135deg, #ffd700, #f7971e);
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             color: #000;
-            font-weight: bold;
-            font-size: 11px;
+            font-weight: 700;
+            font-size: 14px;
             cursor: pointer;
-            transition: 0.3s;
-            z-index: 10;
+            transition: 0.25s;
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2);
         }
         #nextWaveBtn:active {
-            transform: scale(0.95);
+            transform: scale(0.94);
         }
         #nextWaveBtn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            transform: scale(1.04);
+            box-shadow: 0 4px 30px rgba(255, 215, 0, 0.35);
         }
         #nextWaveBtn:disabled {
             opacity: 0.3;
             cursor: not-allowed;
             transform: none !important;
+            box-shadow: none;
         }
-        
+
+        /* ===== GAME OVER ===== */
         #gameOver {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.95);
-            padding: 25px 35px;
-            border-radius: 20px;
+            background: rgba(10, 10, 30, 0.96);
+            backdrop-filter: blur(16px);
+            padding: 40px 50px;
+            border-radius: 28px;
             border: 2px solid #ff4444;
             display: none;
             z-index: 20;
             text-align: center;
             color: #fff;
-            min-width: 280px;
+            min-width: 300px;
+            box-shadow: 0 0 80px rgba(255, 50, 50, 0.15);
         }
-        #gameOver h2 { font-size: 32px; color: #ff4444; }
-        #gameOver p { font-size: 18px; color: #ffd700; margin: 8px 0; }
+        #gameOver h2 {
+            font-size: 42px;
+            color: #ff4444;
+            margin-bottom: 6px;
+        }
+        #gameOver p {
+            font-size: 20px;
+            color: #ffd700;
+            margin: 8px 0;
+        }
         #gameOver button {
-            padding: 10px 30px;
+            padding: 12px 40px;
             background: #ffd700;
             border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: 700;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.25s;
             touch-action: manipulation;
+            margin-top: 12px;
         }
         #gameOver button:active {
-            transform: scale(0.95);
+            transform: scale(0.94);
         }
-        #gameOver button:hover { transform: scale(1.05); }
-        
+        #gameOver button:hover {
+            transform: scale(1.04);
+        }
+
         .wave-announce {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             color: #fff;
-            font-size: 36px;
-            font-weight: bold;
-            text-shadow: 0 0 40px rgba(255, 215, 0, 0.5);
+            font-size: 52px;
+            font-weight: 900;
+            text-shadow: 0 0 60px rgba(255, 215, 0, 0.4);
             pointer-events: none;
             z-index: 5;
             opacity: 0;
             transition: opacity 0.5s;
         }
-        #waveInfo {
-            color: #888;
-            font-size: 10px;
-            text-align: center;
-            padding: 2px 8px;
-            background: rgba(0,0,0,0.5);
-            border-radius: 6px;
-        }
+
         #placementHint {
             position: absolute;
-            top: 50px;
+            top: 70px;
             left: 50%;
             transform: translateX(-50%);
             color: #51cf66;
-            font-size: 12px;
-            background: rgba(0,0,0,0.8);
-            padding: 5px 14px;
-            border-radius: 8px;
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            padding: 8px 20px;
+            border-radius: 12px;
             z-index: 10;
             display: none;
-            border: 1px solid rgba(81, 207, 102, 0.3);
+            border: 1px solid rgba(81, 207, 102, 0.2);
             text-align: center;
-            max-width: 90%;
+            font-weight: 500;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
-        
-        /* Мобильная кнопка стрельбы */
-        #shootBtn {
-            position: absolute;
-            bottom: 80px;
-            right: 20px;
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(255,215,0,0.3), rgba(255,215,0,0.1));
-            border: 3px solid rgba(255,215,0,0.4);
-            color: #fff;
-            font-size: 28px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 15;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-            box-shadow: 0 0 30px rgba(255,215,0,0.1);
-            user-select: none;
-            -webkit-user-select: none;
-            cursor: pointer;
-        }
-        #shootBtn:active {
-            transform: scale(0.92);
-            background: radial-gradient(circle, rgba(255,215,0,0.5), rgba(255,215,0,0.2));
-        }
-        #shootBtn .icon {
-            font-size: 32px;
-            text-shadow: 0 0 20px rgba(255,215,0,0.5);
-        }
-        #shootBtn .sub {
-            font-size: 8px;
-            color: rgba(255,255,255,0.5);
-            position: absolute;
-            bottom: 6px;
-        }
-        
+
+        /* ===== МОБИЛЬНАЯ АДАПТАЦИЯ ===== */
         @media (max-width: 768px) {
-            #ui { font-size: 10px; gap: 8px; padding: 5px 10px; top: 5px; }
-            #ui .hp-bar { width: 40px; height: 6px; }
-            .shop-btn { padding: 3px 6px; font-size: 8px; min-width: 38px; }
-            .shop-btn .cost { font-size: 7px; }
-            .shop-btn .label { font-size: 7px; }
-            #nextWaveBtn { font-size: 10px; padding: 5px 10px; }
-            #gameOver { padding: 20px 25px; min-width: 220px; }
-            #gameOver h2 { font-size: 26px; }
-            #gameOver p { font-size: 16px; }
-            .wave-announce { font-size: 28px; }
-            #placementHint { font-size: 10px; top: 42px; padding: 4px 10px; }
-            #shootBtn { width: 60px; height: 60px; bottom: 75px; right: 15px; font-size: 24px; }
-            #shootBtn .icon { font-size: 26px; }
-            #shop { max-height: 25vh; padding: 6px 8px; gap: 4px; }
+            #ui {
+                padding: 6px 12px;
+                gap: 6px;
+                font-size: 11px;
+                min-width: auto;
+                border-radius: 12px;
+                top: 6px;
+            }
+            #ui .item {
+                padding: 2px 8px;
+                border-radius: 8px;
+            }
+            #ui .icon {
+                font-size: 13px;
+            }
+            #ui .value {
+                font-size: 12px;
+            }
+            #ui .hp-bar {
+                width: 50px;
+                height: 6px;
+            }
+            #ui .hp-bar-wrap {
+                padding: 2px 6px 2px 4px;
+            }
+
+            #shop {
+                padding: 8px 10px;
+                gap: 5px;
+                border-radius: 14px;
+                bottom: 10px;
+            }
+            .shop-btn {
+                padding: 6px 10px;
+                font-size: 11px;
+                min-width: 50px;
+                border-radius: 10px;
+            }
+            .shop-btn .label {
+                font-size: 11px;
+            }
+            .shop-btn .cost {
+                font-size: 9px;
+            }
+            .shop-btn .sub {
+                font-size: 8px;
+            }
+            #nextWaveBtn {
+                padding: 6px 14px;
+                font-size: 12px;
+                border-radius: 10px;
+            }
+
+            #gameOver {
+                padding: 28px 32px;
+                min-width: 240px;
+                border-radius: 22px;
+            }
+            #gameOver h2 {
+                font-size: 32px;
+            }
+            #gameOver p {
+                font-size: 17px;
+            }
+            #gameOver button {
+                padding: 10px 30px;
+                font-size: 16px;
+            }
+            .wave-announce {
+                font-size: 36px;
+            }
+            #placementHint {
+                font-size: 12px;
+                top: 54px;
+                padding: 5px 14px;
+            }
         }
-        
+
         @media (max-width: 480px) {
-            #ui { font-size: 8px; gap: 5px; padding: 3px 6px; }
-            #ui .hp-bar { width: 30px; height: 5px; }
-            .shop-btn { padding: 2px 4px; font-size: 7px; min-width: 32px; }
-            .shop-btn .cost { font-size: 6px; }
-            .shop-btn .label { font-size: 6px; }
-            #nextWaveBtn { font-size: 8px; padding: 4px 8px; }
-            #shootBtn { width: 50px; height: 50px; bottom: 65px; right: 10px; font-size: 20px; }
-            #shootBtn .icon { font-size: 22px; }
-            #gameOver { padding: 15px 20px; min-width: 180px; }
-            #gameOver h2 { font-size: 22px; }
-            #gameOver p { font-size: 14px; }
-            .wave-announce { font-size: 22px; }
-            #placementHint { font-size: 9px; top: 35px; padding: 3px 8px; }
-            #shop { max-height: 20vh; padding: 4px 6px; gap: 3px; }
+            #ui {
+                padding: 4px 8px;
+                gap: 4px;
+                font-size: 9px;
+                border-radius: 10px;
+                top: 4px;
+            }
+            #ui .item {
+                padding: 1px 5px;
+                border-radius: 6px;
+            }
+            #ui .icon {
+                font-size: 10px;
+            }
+            #ui .value {
+                font-size: 10px;
+                min-width: 14px;
+            }
+            #ui .hp-bar {
+                width: 35px;
+                height: 5px;
+            }
+
+            #shop {
+                padding: 5px 6px;
+                gap: 4px;
+                border-radius: 12px;
+                bottom: 6px;
+            }
+            .shop-btn {
+                padding: 4px 7px;
+                font-size: 9px;
+                min-width: 38px;
+                border-radius: 8px;
+                border-width: 1.5px;
+            }
+            .shop-btn .label {
+                font-size: 9px;
+            }
+            .shop-btn .cost {
+                font-size: 8px;
+            }
+            .shop-btn .sub {
+                font-size: 7px;
+            }
+            #nextWaveBtn {
+                padding: 4px 10px;
+                font-size: 10px;
+                border-radius: 8px;
+            }
+
+            #gameOver {
+                padding: 20px 22px;
+                min-width: 180px;
+                border-radius: 18px;
+            }
+            #gameOver h2 {
+                font-size: 26px;
+            }
+            #gameOver p {
+                font-size: 14px;
+            }
+            #gameOver button {
+                padding: 8px 22px;
+                font-size: 14px;
+            }
+            .wave-announce {
+                font-size: 28px;
+            }
+            #placementHint {
+                font-size: 10px;
+                top: 44px;
+                padding: 4px 10px;
+            }
         }
     </style>
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
-    
+
+    <!-- ===== ВЕРХНЯЯ ПАНЕЛЬ ===== -->
     <div id="ui">
-        <div>
-            ❤️ <span class="hp" id="hpDisplay">100</span>
-            <span class="hp-bar"><span class="fill" id="hpFill" style="width:100%"></span></span>
+        <div class="hp-bar-wrap">
+            <span class="icon">❤️</span>
+            <span class="value hp-value" id="hpDisplay">100</span>
+            <div class="hp-bar"><div class="fill" id="hpFill" style="width:100%"></div></div>
         </div>
-        <div>🛡️ <span class="shield" id="shieldDisplay">0</span></div>
-        <div>💰 <span id="goldDisplay">50</span></div>
-        <div>🌊 <span id="levelDisplay">0</span></div>
-        <div>🎯 <span id="killsDisplay">0</span></div>
-        <div id="waveInfo">👾 <span id="enemyCount">0</span> ⚡<span id="speedInfo">1.0</span></div>
+        <div class="item">
+            <span class="icon">🛡️</span>
+            <span class="value shield-value" id="shieldDisplay">0</span>
+        </div>
+        <div class="item">
+            <span class="icon">💰</span>
+            <span class="value gold-value" id="goldDisplay">50</span>
+        </div>
+        <div class="item">
+            <span class="icon">🌊</span>
+            <span class="value wave-value" id="levelDisplay">0</span>
+        </div>
+        <div class="item">
+            <span class="icon">🎯</span>
+            <span class="value kills-value" id="killsDisplay">0</span>
+        </div>
+        <div class="item">
+            <span class="icon">👾</span>
+            <span class="value" id="enemyCount">0</span>
+        </div>
+        <div class="item">
+            <span class="icon">⚡</span>
+            <span class="value speed-value" id="speedInfo">1.0</span>
+        </div>
     </div>
-    
+
+    <!-- ===== НИЖНЯЯ ПАНЕЛЬ ===== -->
     <div id="shop">
         <button id="nextWaveBtn">⚔️ ВОЛНА</button>
-        
+
         <div class="shop-btn" data-type="turret">
-            <div class="label">🎯 Пушка</div>
-            <div class="cost">💰50</div>
+            <span class="label">🎯 Пушка</span>
+            <span class="cost">💰50</span>
         </div>
         <div class="shop-btn" data-type="double">
-            <div class="label">🔫 Двуствол</div>
-            <div class="cost">💰100</div>
+            <span class="label">🔫 Двуствол</span>
+            <span class="cost">💰100</span>
         </div>
         <div class="shop-btn" data-type="shotgun">
-            <div class="label">💥 Дроб</div>
-            <div class="cost">💰150</div>
+            <span class="label">💥 Дроб</span>
+            <span class="cost">💰150</span>
         </div>
         <div class="shop-btn" data-type="auto">
-            <div class="label">🤖 Авто</div>
-            <div class="cost">💰200</div>
+            <span class="label">🤖 Авто</span>
+            <span class="cost">💰200</span>
         </div>
         <div class="shop-btn" data-type="wall">
-            <div class="label">🧱 Стена</div>
-            <div class="cost">💰75</div>
+            <span class="label">🧱 Стена</span>
+            <span class="cost">💰75</span>
         </div>
         <div class="shop-btn" data-type="warrior">
-            <div class="label">⚔️ Воин</div>
-            <div class="cost">💰120</div>
+            <span class="label">⚔️ Воин</span>
+            <span class="cost">💰120</span>
         </div>
         <div class="shop-btn" data-type="shield">
-            <div class="label">🛡️ Щит</div>
-            <div class="cost">💰80</div>
-            <div class="count">+5</div>
+            <span class="label">🛡️ Щит</span>
+            <span class="cost">💰80</span>
+            <span class="sub">+5</span>
         </div>
         <div class="shop-btn" data-type="heal">
-            <div class="label">💚 Леч</div>
-            <div class="cost">💰40</div>
-            <div class="count">+30HP</div>
+            <span class="label">💚 Леч</span>
+            <span class="cost">💰40</span>
+            <span class="sub">+30HP</span>
         </div>
     </div>
-    
-    <!-- Мобильная кнопка стрельбы -->
-    <div id="shootBtn">
-        <span class="icon">🎯</span>
-        <span class="sub">СТРЕЛЯТЬ</span>
-    </div>
-    
-    <div id="placementHint">🟢 Наведи на клетку и нажми для установки</div>
-    
+
+    <div id="placementHint">🟢 Нажми на поле, чтобы установить</div>
+
     <div id="gameOver">
         <h2>💀 ПОРАЖЕНИЕ</h2>
         <p>Волна: <span id="finalWave">1</span></p>
         <p>Убито: <span id="finalKills">0</span></p>
         <button id="restartBtn">🔄 Заново</button>
     </div>
-    
+
     <div class="wave-announce" id="waveAnnounce">🌊 ВОЛНА 1</div>
 
     <script>
         // ============================================================
-        // ЗАЩИТА БАШНИ - С АДАПТАЦИЕЙ ДЛЯ ТЕЛЕФОНА
+        // ПОЛНАЯ ИГРА — КРАСИВЫЙ ИНТЕРФЕЙС, БЕЗ КНОПКИ СТРЕЛЬБЫ
+        // СТРЕЛЬБА ПРИ КАСАНИИ/КЛИКЕ НА КАНВАС
         // ============================================================
 
         const canvas = document.getElementById('gameCanvas');
@@ -405,7 +567,6 @@
         const waveAnnounce = document.getElementById('waveAnnounce');
         const nextWaveBtn = document.getElementById('nextWaveBtn');
         const placementHint = document.getElementById('placementHint');
-        const shootBtn = document.getElementById('shootBtn');
 
         // ======== ПАРАМЕТРЫ ========
         const TOWER_X = WIDTH / 2;
@@ -417,7 +578,6 @@
         const GRID_OFFSET_Y = 35;
         const DAMAGE_LINE_Y = HEIGHT - 120;
 
-        // Параметры сложности
         const MAX_ENEMIES_PER_WAVE = 30;
         const MAX_SPEED_MULTIPLIER = 2.0;
         const ENEMIES_GROWTH_RATE = 2;
@@ -427,7 +587,6 @@
             hp: 100,
             maxHp: 100,
             shield: 0,
-            maxShield: 0,
             gold: 50,
             kills: 0,
             wave: 0,
@@ -459,12 +618,9 @@
         let mouseY = TOWER_Y;
         let frameCount = 0;
 
-        // ======== ОПРЕДЕЛЕНИЕ МОБИЛЬНОГО УСТРОЙСТВА ========
+        // ======== ОПРЕДЕЛЕНИЕ МОБИЛЬНОСТИ ========
         function checkMobile() {
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
-            game.isMobile = isMobile;
-            shootBtn.style.display = isMobile ? 'flex' : 'none';
-            return isMobile;
+            game.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
         }
         checkMobile();
 
@@ -483,8 +639,8 @@
                 this.goldReward = 10;
                 this.alive = true;
                 this.hasDamaged = false;
-                
-                switch(type) {
+
+                switch (type) {
                     case 'fast':
                         this.radius = 11;
                         this.baseSpeed = 1.5 + Math.random() * 0.3;
@@ -522,7 +678,7 @@
                         this.color = '#ff922b';
                         this.icon = '👾';
                 }
-                
+
                 const waveScale = 1 + Math.min(game.wave - 1, 10) * 0.12;
                 this.hp = Math.floor(this.hp * waveScale);
                 this.maxHp = this.hp;
@@ -532,13 +688,12 @@
 
             update() {
                 if (!this.alive) return true;
-                
                 this.y += this.speed;
-                
+
                 if (this.y >= DAMAGE_LINE_Y - this.radius && !this.hasDamaged) {
                     this.hasDamaged = true;
                     this.alive = false;
-                    
+
                     let damageDealt = this.damage;
                     if (game.shield > 0) {
                         game.shield--;
@@ -556,10 +711,10 @@
                             });
                         }
                     }
-                    
+
                     game.hp -= damageDealt;
                     if (game.hp < 0) game.hp = 0;
-                    
+
                     for (let i = 0; i < 25; i++) {
                         game.particles.push({
                             x: this.x,
@@ -572,15 +727,12 @@
                             size: 3 + Math.random() * 6
                         });
                     }
-                    
+
                     updateUI();
-                    
-                    if (game.hp <= 0) {
-                        endGame();
-                    }
+                    if (game.hp <= 0) endGame();
                     return true;
                 }
-                
+
                 for (let wall of game.walls) {
                     const d = Math.sqrt((this.x - wall.x) ** 2 + (this.y - wall.y) ** 2);
                     if (d < this.radius + wall.radius) {
@@ -589,7 +741,7 @@
                         this.y += Math.sin(angle) * 1.5;
                     }
                 }
-                
+
                 if (this.y > HEIGHT + 50) {
                     this.alive = false;
                     return true;
@@ -604,7 +756,6 @@
                     this.alive = false;
                     game.gold += this.goldReward;
                     game.kills++;
-                    
                     for (let i = 0; i < 15; i++) {
                         game.particles.push({
                             x: this.x,
@@ -625,7 +776,6 @@
 
             draw() {
                 if (!this.alive) return;
-                
                 ctx.shadowColor = this.color;
                 ctx.shadowBlur = 10;
                 ctx.beginPath();
@@ -633,14 +783,14 @@
                 ctx.fillStyle = this.color;
                 ctx.fill();
                 ctx.shadowBlur = 0;
-                
+
                 const hpPercent = this.hp / this.maxHp;
                 const barWidth = this.radius * 2;
                 ctx.fillStyle = 'rgba(0,0,0,0.6)';
-                ctx.fillRect(this.x - barWidth/2, this.y - this.radius - 8, barWidth, 4);
+                ctx.fillRect(this.x - barWidth / 2, this.y - this.radius - 8, barWidth, 4);
                 ctx.fillStyle = hpPercent > 0.5 ? '#51cf66' : hpPercent > 0.25 ? '#ffd93d' : '#ff6b6b';
-                ctx.fillRect(this.x - barWidth/2, this.y - this.radius - 8, barWidth * hpPercent, 4);
-                
+                ctx.fillRect(this.x - barWidth / 2, this.y - this.radius - 8, barWidth * hpPercent, 4);
+
                 ctx.fillStyle = '#fff';
                 ctx.font = '14px Arial';
                 ctx.textAlign = 'center';
@@ -649,7 +799,7 @@
             }
         }
 
-        // ======== КЛАСС ПУШКИ ========
+        // ======== ПУШКА ========
         class Turret {
             constructor(x, y, type) {
                 this.x = x;
@@ -663,10 +813,9 @@
                 this.fireRate = 15;
                 this.color = '#ffd700';
                 this.icon = '🎯';
-                this.isShooting = false;
                 this.isAuto = false;
-                
-                switch(type) {
+
+                switch (type) {
                     case 'turret':
                         this.damage = 10;
                         this.fireRate = 15;
@@ -701,7 +850,6 @@
 
             updateAuto() {
                 if (!this.isAuto) return;
-                
                 let target = null;
                 let targetDist = Infinity;
                 for (let enemy of game.enemies) {
@@ -712,7 +860,6 @@
                         target = enemy;
                     }
                 }
-                
                 if (target) {
                     this.angle = Math.atan2(target.y - this.y, target.x - this.x);
                     this.cooldown--;
@@ -725,12 +872,10 @@
                 }
             }
 
-            updateManual(mouseX, mouseY, isShooting) {
+            updateManual(mx, my, shooting) {
                 if (this.isAuto) return;
-                
-                this.angle = Math.atan2(mouseY - this.y, mouseX - this.x);
-                
-                if (isShooting) {
+                this.angle = Math.atan2(my - this.y, mx - this.x);
+                if (shooting) {
                     this.cooldown--;
                     if (this.cooldown <= 0) {
                         this.shoot(this.angle);
@@ -743,8 +888,7 @@
 
             shoot(angle) {
                 const spread = this.type === 'shotgun' ? 0.15 : 0.03;
-                
-                switch(this.type) {
+                switch (this.type) {
                     case 'turret':
                         game.bullets.push(new Bullet(this.x, this.y, angle + (Math.random() - 0.5) * spread, this.damage, this.color));
                         break;
@@ -761,7 +905,6 @@
                         game.bullets.push(new Bullet(this.x, this.y, angle + (Math.random() - 0.5) * spread, this.damage * 1.2, this.color, 9));
                         break;
                 }
-                
                 for (let i = 0; i < 5; i++) {
                     game.particles.push({
                         x: this.x + Math.cos(angle) * this.radius,
@@ -784,7 +927,7 @@
                 ctx.strokeStyle = 'rgba(255,255,255,0.05)';
                 ctx.lineWidth = 1;
                 ctx.stroke();
-                
+
                 ctx.shadowColor = this.color;
                 ctx.shadowBlur = 15;
                 ctx.beginPath();
@@ -792,25 +935,25 @@
                 ctx.fillStyle = '#2d2d5e';
                 ctx.fill();
                 ctx.shadowBlur = 0;
-                
+
                 ctx.beginPath();
                 ctx.moveTo(this.x, this.y);
-                ctx.lineTo(this.x + Math.cos(this.angle) * this.radius * 1.5, 
-                          this.y + Math.sin(this.angle) * this.radius * 1.5);
+                ctx.lineTo(this.x + Math.cos(this.angle) * this.radius * 1.5,
+                    this.y + Math.sin(this.angle) * this.radius * 1.5);
                 ctx.strokeStyle = this.color;
                 ctx.lineWidth = 3;
                 ctx.shadowColor = this.color;
                 ctx.shadowBlur = 10;
                 ctx.stroke();
                 ctx.shadowBlur = 0;
-                
+
                 ctx.fillStyle = '#fff';
                 ctx.font = '16px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(this.icon, this.x, this.y + 1);
-                
-                if (this.isShooting || this.isAuto) {
+
+                if (this.isAuto || game.isShooting) {
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, this.radius + 4, 0, Math.PI * 2);
                     ctx.strokeStyle = this.color;
@@ -822,7 +965,7 @@
             }
         }
 
-        // ======== КЛАСС ВОИН ========
+        // ======== ВОИН ========
         class Warrior {
             constructor(x, y) {
                 this.x = x;
@@ -841,7 +984,6 @@
 
             update() {
                 if (!this.alive) return;
-                
                 let closest = null;
                 let closestDist = Infinity;
                 for (let enemy of game.enemies) {
@@ -852,13 +994,11 @@
                         closest = enemy;
                     }
                 }
-                
                 if (closest && closestDist < 200) {
                     this.target = closest;
                     const angle = Math.atan2(closest.y - this.y, closest.x - this.x);
                     this.x += Math.cos(angle) * this.speed;
                     this.y += Math.sin(angle) * this.speed;
-                    
                     this.attackCooldown--;
                     if (this.attackCooldown <= 0 && closestDist < 40) {
                         const killed = closest.takeDamage(this.damage);
@@ -873,14 +1013,12 @@
                     this.x += Math.cos(angle) * 0.5;
                     this.y += Math.sin(angle) * 0.5;
                 }
-                
                 this.x = Math.max(20, Math.min(WIDTH - 20, this.x));
                 this.y = Math.max(20, Math.min(HEIGHT - 20, this.y));
             }
 
             draw() {
                 if (!this.alive) return;
-                
                 ctx.shadowColor = this.color;
                 ctx.shadowBlur = 15;
                 ctx.beginPath();
@@ -888,14 +1026,14 @@
                 ctx.fillStyle = this.color;
                 ctx.fill();
                 ctx.shadowBlur = 0;
-                
+
                 const hpPercent = this.hp / this.maxHp;
                 const barWidth = this.radius * 2;
                 ctx.fillStyle = 'rgba(0,0,0,0.6)';
-                ctx.fillRect(this.x - barWidth/2, this.y - this.radius - 8, barWidth, 4);
+                ctx.fillRect(this.x - barWidth / 2, this.y - this.radius - 8, barWidth, 4);
                 ctx.fillStyle = hpPercent > 0.5 ? '#51cf66' : hpPercent > 0.25 ? '#ffd93d' : '#ff6b6b';
-                ctx.fillRect(this.x - barWidth/2, this.y - this.radius - 8, barWidth * hpPercent, 4);
-                
+                ctx.fillRect(this.x - barWidth / 2, this.y - this.radius - 8, barWidth * hpPercent, 4);
+
                 ctx.fillStyle = '#fff';
                 ctx.font = '18px Arial';
                 ctx.textAlign = 'center';
@@ -904,7 +1042,7 @@
             }
         }
 
-        // ======== КЛАСС СТЕНА ========
+        // ======== СТЕНА ========
         class Wall {
             constructor(x, y) {
                 this.x = x;
@@ -926,13 +1064,13 @@
                 ctx.strokeStyle = 'rgba(100, 150, 255, 0.3)';
                 ctx.lineWidth = 2;
                 ctx.stroke();
-                
+
                 const hpPercent = this.hp / this.maxHp;
                 ctx.fillStyle = 'rgba(0,0,0,0.5)';
                 ctx.fillRect(this.x - 18, this.y + this.radius + 5, 36, 4);
                 ctx.fillStyle = '#51cf66';
                 ctx.fillRect(this.x - 18, this.y + this.radius + 5, 36 * hpPercent, 4);
-                
+
                 ctx.fillStyle = 'rgba(255,255,255,0.3)';
                 ctx.font = '20px Arial';
                 ctx.textAlign = 'center';
@@ -941,7 +1079,7 @@
             }
         }
 
-        // ======== КЛАСС ПУЛЯ ========
+        // ======== ПУЛЯ ========
         class Bullet {
             constructor(x, y, angle, damage, color = '#ffd700', speed = 8) {
                 this.x = x;
@@ -958,8 +1096,8 @@
                 this.x += Math.cos(this.angle) * this.speed;
                 this.y += Math.sin(this.angle) * this.speed;
                 this.life--;
-                return this.life > 0 && this.x > -50 && this.x < WIDTH + 50 && 
-                       this.y > -50 && this.y < HEIGHT + 50;
+                return this.life > 0 && this.x > -50 && this.x < WIDTH + 50 &&
+                    this.y > -50 && this.y < HEIGHT + 50;
             }
 
             draw() {
@@ -973,40 +1111,29 @@
             }
         }
 
-        // ======== СПАВН ========
+        // ======== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ========
         function spawnEnemy() {
             const types = ['normal', 'normal'];
             if (game.wave > 2) types.push('fast');
-            if (game.wave > 4) { types.push('fast'); types.push('tank'); }
+            if (game.wave > 4) { types.push('fast');
+                types.push('tank'); }
             if (game.wave > 8) types.push('tank');
             if (game.wave > 12 && game.wave % 5 === 0) types.push('boss');
-            
             const type = types[Math.floor(Math.random() * types.length)];
-            const enemy = new Enemy(type);
-            game.enemies.push(enemy);
+            game.enemies.push(new Enemy(type));
         }
 
-        // ======== ВОЛНЫ ========
         function startWave() {
             if (game.gameOver) return;
             game.wave++;
-            
-            game.enemiesPerWave = Math.min(
-                5 + game.wave * ENEMIES_GROWTH_RATE,
-                MAX_ENEMIES_PER_WAVE
-            );
-            
-            game.currentSpeedMult = Math.min(
-                1 + (game.wave - 1) * SPEED_GROWTH_RATE,
-                MAX_SPEED_MULTIPLIER
-            );
-            
+            game.enemiesPerWave = Math.min(5 + game.wave * ENEMIES_GROWTH_RATE, MAX_ENEMIES_PER_WAVE);
+            game.currentSpeedMult = Math.min(1 + (game.wave - 1) * SPEED_GROWTH_RATE, MAX_SPEED_MULTIPLIER);
             game.enemiesSpawned = 0;
             game.spawnTimer = 0;
             game.waveActive = true;
             game.waveReady = false;
             nextWaveBtn.disabled = true;
-            
+
             waveAnnounce.textContent = `🌊 ВОЛНА ${game.wave}`;
             waveAnnounce.style.opacity = 1;
             setTimeout(() => { waveAnnounce.style.opacity = 0; }, 1500);
@@ -1015,7 +1142,6 @@
 
         function updateWave() {
             if (game.gameOver || !game.waveActive) return;
-            
             if (game.enemiesSpawned < game.enemiesPerWave) {
                 game.spawnTimer--;
                 if (game.spawnTimer <= 0) {
@@ -1030,10 +1156,8 @@
                     game.waveActive = false;
                     game.waveReady = true;
                     nextWaveBtn.disabled = false;
-                    
                     const bonus = 10 + game.wave * 3;
                     game.gold += bonus;
-                    
                     for (let i = 0; i < 25; i++) {
                         game.particles.push({
                             x: TOWER_X + (Math.random() - 0.5) * 150,
@@ -1051,18 +1175,14 @@
             }
         }
 
-        // ======== СТРЕЛЬБА БАШНИ ========
         function towerShoot() {
             if (game.gameOver) return;
-            
             const angle = Math.atan2(mouseY - TOWER_Y, mouseX - TOWER_X);
             game.towerAngle = angle;
-            
             if (game.isShooting) {
                 game.towerCooldown--;
                 if (game.towerCooldown <= 0) {
                     game.bullets.push(new Bullet(TOWER_X, TOWER_Y, angle, game.towerDamage, '#ffd700', 9));
-                    
                     for (let i = 0; i < 6; i++) {
                         game.particles.push({
                             x: TOWER_X + Math.cos(angle) * TOWER_RADIUS,
@@ -1075,7 +1195,6 @@
                             size: 2 + Math.random() * 3
                         });
                     }
-                    
                     game.towerCooldown = game.towerFireRate;
                 }
             } else {
@@ -1083,28 +1202,21 @@
             }
         }
 
-        // ======== ОБНОВЛЕНИЕ ========
         function update() {
             if (game.gameOver) return;
-            
             frameCount++;
-            
+
             towerShoot();
-            
+
             for (let turret of game.turrets) {
-                if (turret.isAuto) {
-                    turret.updateAuto();
-                } else {
-                    turret.updateManual(mouseX, mouseY, game.isShooting);
-                }
+                if (turret.isAuto) turret.updateAuto();
+                else turret.updateManual(mouseX, mouseY, game.isShooting);
             }
-            
-            // Пули
+
             for (let i = game.bullets.length - 1; i >= 0; i--) {
                 const bullet = game.bullets[i];
                 const alive = bullet.update();
                 if (!alive) { game.bullets.splice(i, 1); continue; }
-                
                 let hit = false;
                 for (let j = game.enemies.length - 1; j >= 0; j--) {
                     const enemy = game.enemies[j];
@@ -1112,32 +1224,22 @@
                     const dist = Math.sqrt((bullet.x - enemy.x) ** 2 + (bullet.y - enemy.y) ** 2);
                     if (dist < bullet.radius + enemy.radius) {
                         const killed = enemy.takeDamage(bullet.damage);
-                        if (killed) {
-                            game.enemies.splice(j, 1);
-                            updateUI();
-                        }
+                        if (killed) game.enemies.splice(j, 1);
                         hit = true;
                         break;
                     }
                 }
                 if (hit) game.bullets.splice(i, 1);
             }
-            
-            // Враги
+
             for (let i = game.enemies.length - 1; i >= 0; i--) {
                 const enemy = game.enemies[i];
                 const removed = enemy.update();
-                if (removed || !enemy.alive) {
-                    game.enemies.splice(i, 1);
-                }
+                if (removed || !enemy.alive) game.enemies.splice(i, 1);
             }
-            
-            // Воины
-            for (let warrior of game.warriors) {
-                warrior.update();
-            }
-            
-            // Частицы
+
+            for (let warrior of game.warriors) warrior.update();
+
             for (let i = game.particles.length - 1; i >= 0; i--) {
                 const p = game.particles[i];
                 p.x += p.vx;
@@ -1146,7 +1248,7 @@
                 p.life--;
                 if (p.life <= 0) game.particles.splice(i, 1);
             }
-            
+
             updateWave();
             updateUI();
         }
@@ -1154,22 +1256,20 @@
         // ======== ОТРИСОВКА ========
         function draw() {
             ctx.clearRect(0, 0, WIDTH, HEIGHT);
-            
             const grad = ctx.createRadialGradient(TOWER_X, TOWER_Y, 0, TOWER_X, TOWER_Y, 600);
             grad.addColorStop(0, '#1a1a3e');
             grad.addColorStop(1, '#0a0a1a');
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
-            
-            // Красная граница
-            const gradBorder = ctx.createLinearGradient(0, 0, 0, 30);
-            gradBorder.addColorStop(0, 'rgba(255, 50, 50, 0.5)');
-            gradBorder.addColorStop(0.5, 'rgba(255, 50, 50, 0.2)');
-            gradBorder.addColorStop(1, 'rgba(255, 50, 50, 0)');
-            ctx.fillStyle = gradBorder;
+
+            // Красная граница сверху
+            const gb = ctx.createLinearGradient(0, 0, 0, 30);
+            gb.addColorStop(0, 'rgba(255,50,50,0.5)');
+            gb.addColorStop(0.5, 'rgba(255,50,50,0.2)');
+            gb.addColorStop(1, 'rgba(255,50,50,0)');
+            ctx.fillStyle = gb;
             ctx.fillRect(0, 0, WIDTH, 30);
-            
-            ctx.strokeStyle = 'rgba(255, 50, 50, 0.7)';
+            ctx.strokeStyle = 'rgba(255,50,50,0.7)';
             ctx.lineWidth = 2;
             ctx.setLineDash([10, 10]);
             ctx.beginPath();
@@ -1177,22 +1277,20 @@
             ctx.lineTo(WIDTH, SPAWN_Y);
             ctx.stroke();
             ctx.setLineDash([]);
-            
-            ctx.fillStyle = 'rgba(255, 50, 50, 0.4)';
+            ctx.fillStyle = 'rgba(255,50,50,0.4)';
             ctx.font = '11px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'top';
-            ctx.fillText('⚠️ ВРАГИ ИДУТ ОТСЮДА', WIDTH/2, 2);
-            
+            ctx.fillText('⚠️ ВРАГИ ИДУТ ОТСЮДА', WIDTH / 2, 2);
+
             // Красная линия урона
-            const gradDamage = ctx.createLinearGradient(0, DAMAGE_LINE_Y - 10, 0, DAMAGE_LINE_Y + 10);
-            gradDamage.addColorStop(0, 'rgba(255, 0, 0, 0)');
-            gradDamage.addColorStop(0.5, 'rgba(255, 0, 0, 0.3)');
-            gradDamage.addColorStop(1, 'rgba(255, 0, 0, 0)');
-            ctx.fillStyle = gradDamage;
+            const gd = ctx.createLinearGradient(0, DAMAGE_LINE_Y - 10, 0, DAMAGE_LINE_Y + 10);
+            gd.addColorStop(0, 'rgba(255,0,0,0)');
+            gd.addColorStop(0.5, 'rgba(255,0,0,0.3)');
+            gd.addColorStop(1, 'rgba(255,0,0,0)');
+            ctx.fillStyle = gd;
             ctx.fillRect(0, DAMAGE_LINE_Y - 10, WIDTH, 20);
-            
-            ctx.strokeStyle = 'rgba(255, 0, 0, 0.6)';
+            ctx.strokeStyle = 'rgba(255,0,0,0.6)';
             ctx.lineWidth = 2;
             ctx.setLineDash([8, 8]);
             ctx.beginPath();
@@ -1200,58 +1298,44 @@
             ctx.lineTo(WIDTH, DAMAGE_LINE_Y);
             ctx.stroke();
             ctx.setLineDash([]);
-            
-            ctx.fillStyle = 'rgba(255, 50, 50, 0.3)';
+            ctx.fillStyle = 'rgba(255,50,50,0.3)';
             ctx.font = '10px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
-            ctx.fillText('💥 ЗОНА УРОНА', WIDTH/2, DAMAGE_LINE_Y - 5);
-            
+            ctx.fillText('💥 ЗОНА УРОНА', WIDTH / 2, DAMAGE_LINE_Y - 5);
+
             // Радиус башни
             ctx.beginPath();
             ctx.arc(TOWER_X, TOWER_Y, 400, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(255, 215, 0, 0.03)';
+            ctx.fillStyle = 'rgba(255,215,0,0.03)';
             ctx.fill();
-            ctx.strokeStyle = 'rgba(255, 215, 0, 0.08)';
+            ctx.strokeStyle = 'rgba(255,215,0,0.08)';
             ctx.lineWidth = 1;
             ctx.stroke();
-            
+
             // Сетка
             for (let row = 0; row < 15; row++) {
                 for (let col = 0; col < 24; col++) {
-                    const x = GRID_OFFSET_X + col * CELL_SIZE + CELL_SIZE/2;
-                    const y = GRID_OFFSET_Y + row * CELL_SIZE + CELL_SIZE/2;
-                    
-                    let occupied = false;
-                    if (y > DAMAGE_LINE_Y - 20) occupied = true;
-                    
-                    for (let t of game.turrets) {
+                    const x = GRID_OFFSET_X + col * CELL_SIZE + CELL_SIZE / 2;
+                    const y = GRID_OFFSET_Y + row * CELL_SIZE + CELL_SIZE / 2;
+                    let occupied = y > DAMAGE_LINE_Y - 20;
+                    for (let t of game.turrets)
                         if (Math.sqrt((t.x - x) ** 2 + (t.y - y) ** 2) < 20) occupied = true;
-                    }
-                    for (let w of game.walls) {
+                    for (let w of game.walls)
                         if (Math.sqrt((w.x - x) ** 2 + (w.y - y) ** 2) < 20) occupied = true;
-                    }
-                    for (let w of game.warriors) {
+                    for (let w of game.warriors)
                         if (Math.sqrt((w.x - x) ** 2 + (w.y - y) ** 2) < 20) occupied = true;
-                    }
-                    
                     const isHover = (game.mouseGridX === col && game.mouseGridY === row && game.placementType);
-                    
                     ctx.fillStyle = occupied ? 'rgba(255,50,50,0.05)' : 'rgba(255,255,255,0.02)';
-                    if (isHover && !occupied) {
-                        ctx.fillStyle = 'rgba(81, 207, 102, 0.3)';
-                    } else if (isHover && occupied) {
-                        ctx.fillStyle = 'rgba(255, 50, 50, 0.3)';
-                    }
-                    
-                    ctx.fillRect(x - CELL_SIZE/2, y - CELL_SIZE/2, CELL_SIZE, CELL_SIZE);
+                    if (isHover && !occupied) ctx.fillStyle = 'rgba(81,207,102,0.3)';
+                    else if (isHover && occupied) ctx.fillStyle = 'rgba(255,50,50,0.3)';
+                    ctx.fillRect(x - CELL_SIZE / 2, y - CELL_SIZE / 2, CELL_SIZE, CELL_SIZE);
                     ctx.strokeStyle = 'rgba(255,255,255,0.03)';
                     ctx.lineWidth = 0.5;
-                    ctx.strokeRect(x - CELL_SIZE/2, y - CELL_SIZE/2, CELL_SIZE, CELL_SIZE);
+                    ctx.strokeRect(x - CELL_SIZE / 2, y - CELL_SIZE / 2, CELL_SIZE, CELL_SIZE);
                 }
             }
-            
-            // Частицы
+
             for (let p of game.particles) {
                 const alpha = p.life / p.maxLife;
                 ctx.globalAlpha = alpha;
@@ -1261,42 +1345,29 @@
                 ctx.fill();
             }
             ctx.globalAlpha = 1;
-            
-            // Стены
+
             for (let wall of game.walls) wall.draw();
-            
-            // Воины
             for (let warrior of game.warriors) warrior.draw();
-            
-            // Турели
             for (let turret of game.turrets) turret.draw();
-            
-            // Враги
             for (let enemy of game.enemies) enemy.draw();
-            
-            // Пули
             for (let bullet of game.bullets) bullet.draw();
-            
-            // ===== БАШНЯ =====
-            ctx.shadowColor = 'rgba(255, 215, 0, 0.3)';
+
+            // Башня
+            ctx.shadowColor = 'rgba(255,215,0,0.3)';
             ctx.shadowBlur = 30;
-            
             ctx.beginPath();
             ctx.arc(TOWER_X, TOWER_Y, TOWER_RADIUS, 0, Math.PI * 2);
             ctx.fillStyle = '#2d2d5e';
             ctx.fill();
-            
             ctx.shadowBlur = 15;
             ctx.beginPath();
             ctx.arc(TOWER_X, TOWER_Y, TOWER_RADIUS - 4, 0, Math.PI * 2);
             ctx.fillStyle = '#4a4a8a';
             ctx.fill();
-            
             ctx.beginPath();
             ctx.arc(TOWER_X, TOWER_Y - 6, TOWER_RADIUS - 10, 0, Math.PI * 2);
             ctx.fillStyle = '#5a5aaa';
             ctx.fill();
-            
             ctx.beginPath();
             ctx.moveTo(TOWER_X - 18, TOWER_Y - 18);
             ctx.lineTo(TOWER_X, TOWER_Y - 40);
@@ -1304,21 +1375,20 @@
             ctx.closePath();
             ctx.fillStyle = '#6a6aba';
             ctx.fill();
-            
             ctx.shadowBlur = 0;
-            
+
             // Ствол башни
             ctx.beginPath();
             ctx.moveTo(TOWER_X, TOWER_Y);
-            ctx.lineTo(TOWER_X + Math.cos(game.towerAngle) * TOWER_RADIUS * 1.6, 
-                      TOWER_Y + Math.sin(game.towerAngle) * TOWER_RADIUS * 1.6);
+            ctx.lineTo(TOWER_X + Math.cos(game.towerAngle) * TOWER_RADIUS * 1.6,
+                TOWER_Y + Math.sin(game.towerAngle) * TOWER_RADIUS * 1.6);
             ctx.strokeStyle = '#ffd700';
             ctx.lineWidth = 4;
             ctx.shadowColor = '#ffd700';
             ctx.shadowBlur = 15;
             ctx.stroke();
             ctx.shadowBlur = 0;
-            
+
             // Огонь
             for (let i = 0; i < 8; i++) {
                 const angle = (i / 8) * Math.PI * 2 + frameCount * 0.03;
@@ -1329,60 +1399,53 @@
                 ctx.beginPath();
                 ctx.arc(x, y, size, 0, Math.PI * 2);
                 const bright = 0.4 + Math.sin(frameCount * 0.1 + i * 1.3) * 0.2;
-                ctx.fillStyle = `rgba(255, 200, 50, ${bright})`;
+                ctx.fillStyle = `rgba(255,200,50,${bright})`;
                 ctx.fill();
             }
-            
+
             // Окошко
             ctx.beginPath();
             ctx.arc(TOWER_X, TOWER_Y - 4, 8, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(100, 200, 255, 0.15)';
+            ctx.fillStyle = 'rgba(100,200,255,0.15)';
             ctx.fill();
-            ctx.strokeStyle = 'rgba(100, 200, 255, 0.2)';
+            ctx.strokeStyle = 'rgba(100,200,255,0.2)';
             ctx.lineWidth = 1;
             ctx.stroke();
-            
+
             // Щит
             if (game.shield > 0) {
                 ctx.beginPath();
                 ctx.arc(TOWER_X, TOWER_Y, TOWER_RADIUS + 10, 0, Math.PI * 2);
-                ctx.strokeStyle = `rgba(79, 195, 247, ${0.3 + Math.sin(frameCount * 0.05) * 0.1})`;
+                ctx.strokeStyle = `rgba(79,195,247,${0.3 + Math.sin(frameCount * 0.05) * 0.1})`;
                 ctx.lineWidth = 3;
                 ctx.setLineDash([6, 8]);
                 ctx.stroke();
                 ctx.setLineDash([]);
             }
-            
-            // Индикатор стрельбы
+
             if (game.isShooting && !game.gameOver) {
-                ctx.fillStyle = 'rgba(255, 215, 0, 0.15)';
+                ctx.fillStyle = 'rgba(255,215,0,0.15)';
                 ctx.beginPath();
                 ctx.arc(TOWER_X, TOWER_Y, TOWER_RADIUS + 8, 0, Math.PI * 2);
                 ctx.fill();
             }
-            
-            // Индикатор волны
+
             if (game.waveReady && game.wave > 0) {
-                ctx.fillStyle = 'rgba(255, 215, 0, 0.3)';
+                ctx.fillStyle = 'rgba(255,215,0,0.3)';
                 ctx.font = '16px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'bottom';
                 ctx.fillText('⚔️ Нажми "ВОЛНА"', TOWER_X, TOWER_Y - 55);
             }
-            
-            // Подсказка управления
+
+            ctx.fillStyle = 'rgba(255,255,255,0.12)';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
             if (!game.isMobile) {
-                ctx.fillStyle = 'rgba(255,255,255,0.15)';
-                ctx.font = '12px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'top';
-                ctx.fillText('🖱️ Наведи мышку и зажми ЛКМ для стрельбы', WIDTH/2, 10);
+                ctx.fillText('🖱️ Наведи и зажми ЛКМ для стрельбы', WIDTH / 2, 10);
             } else {
-                ctx.fillStyle = 'rgba(255,255,255,0.10)';
-                ctx.font = '11px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'top';
-                ctx.fillText('👆 Нажми на кнопку "СТРЕЛЯТЬ"', WIDTH/2, 10);
+                ctx.fillText('👆 Нажми и держи на поле для стрельбы', WIDTH / 2, 10);
             }
         }
 
@@ -1410,23 +1473,13 @@
         }
 
         // ======== МАГАЗИН ========
-        const prices = {
-            turret: 50,
-            double: 100,
-            shotgun: 150,
-            auto: 200,
-            wall: 75,
-            warrior: 120,
-            shield: 80,
-            heal: 40
-        };
+        const prices = { turret: 50, double: 100, shotgun: 150, auto: 200, wall: 75, warrior: 120, shield: 80, heal: 40 };
 
         function selectPlacement(type) {
             if (game.gameOver) return;
-            
             if (type === 'shield') {
-                if (game.gold < prices.shield) return;
-                game.gold -= prices.shield;
+                if (game.gold < 80) return;
+                game.gold -= 80;
                 game.shield += 5;
                 for (let i = 0; i < 30; i++) {
                     game.particles.push({
@@ -1443,10 +1496,9 @@
                 updateUI();
                 return;
             }
-            
             if (type === 'heal') {
-                if (game.gold < prices.heal) return;
-                game.gold -= prices.heal;
+                if (game.gold < 40) return;
+                game.gold -= 40;
                 game.hp = Math.min(game.maxHp, game.hp + 30);
                 for (let i = 0; i < 30; i++) {
                     game.particles.push({
@@ -1463,42 +1515,31 @@
                 updateUI();
                 return;
             }
-            
             if (game.gold < prices[type]) return;
-            
             game.placementType = type;
             placementHint.style.display = 'block';
-            placementHint.textContent = `🟢 Наведи на клетку и нажми для установки ${type}`;
-            
-            document.querySelectorAll('.shop-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.dataset.type === type) btn.classList.add('active');
+            placementHint.textContent = `🟢 Нажми на поле, чтобы установить ${type}`;
+            document.querySelectorAll('.shop-btn').forEach(b => {
+                b.classList.remove('active');
+                if (b.dataset.type === type) b.classList.add('active');
             });
         }
 
         function placeObject(gridX, gridY) {
             if (!game.placementType) return;
-            
-            const x = GRID_OFFSET_X + gridX * CELL_SIZE + CELL_SIZE/2;
-            const y = GRID_OFFSET_Y + gridY * CELL_SIZE + CELL_SIZE/2;
-            
+            const x = GRID_OFFSET_X + gridX * CELL_SIZE + CELL_SIZE / 2;
+            const y = GRID_OFFSET_Y + gridY * CELL_SIZE + CELL_SIZE / 2;
             if (y > DAMAGE_LINE_Y - 20) return;
-            
-            for (let t of game.turrets) {
+            for (let t of game.turrets)
                 if (Math.sqrt((t.x - x) ** 2 + (t.y - y) ** 2) < 20) return;
-            }
-            for (let w of game.walls) {
+            for (let w of game.walls)
                 if (Math.sqrt((w.x - x) ** 2 + (w.y - y) ** 2) < 20) return;
-            }
-            for (let w of game.warriors) {
+            for (let w of game.warriors)
                 if (Math.sqrt((w.x - x) ** 2 + (w.y - y) ** 2) < 20) return;
-            }
-            
             const price = prices[game.placementType];
             if (game.gold < price) return;
             game.gold -= price;
-            
-            switch(game.placementType) {
+            switch (game.placementType) {
                 case 'turret':
                 case 'double':
                 case 'shotgun':
@@ -1512,34 +1553,26 @@
                     game.warriors.push(new Warrior(x, y));
                     break;
             }
-            
             game.placementType = null;
             placementHint.style.display = 'none';
-            document.querySelectorAll('.shop-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.shop-btn').forEach(b => b.classList.remove('active'));
             updateUI();
         }
 
         // ======== УПРАВЛЕНИЕ ========
-        // МЫШЬ
+        // МЫШЬ — стрельба при зажатой ЛКМ на канвасе
         canvas.addEventListener('mousemove', (e) => {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
             const rawX = (e.clientX - rect.left) * scaleX;
             const rawY = (e.clientY - rect.top) * scaleY;
-            mouseX = rawX;
-            mouseY = rawY;
-            
-            const gridX = Math.floor((rawX - GRID_OFFSET_X) / CELL_SIZE);
-            const gridY = Math.floor((rawY - GRID_OFFSET_Y) / CELL_SIZE);
-            
-            if (gridX >= 0 && gridX < 24 && gridY >= 0 && gridY < 15) {
-                game.mouseGridX = gridX;
-                game.mouseGridY = gridY;
-            } else {
-                game.mouseGridX = -1;
-                game.mouseGridY = -1;
-            }
+            mouseX = Math.max(0, Math.min(WIDTH, rawX));
+            mouseY = Math.max(0, Math.min(HEIGHT, rawY));
+            const gx = Math.floor((rawX - GRID_OFFSET_X) / CELL_SIZE);
+            const gy = Math.floor((rawY - GRID_OFFSET_Y) / CELL_SIZE);
+            game.mouseGridX = (gx >= 0 && gx < 24 && gy >= 0 && gy < 15) ? gx : -1;
+            game.mouseGridY = (gx >= 0 && gx < 24 && gy >= 0 && gy < 15) ? gy : -1;
         });
 
         canvas.addEventListener('mousedown', (e) => {
@@ -1551,38 +1584,10 @@
             game.isShooting = true;
         });
 
-        canvas.addEventListener('mouseup', () => {
-            game.isShooting = false;
-        });
+        canvas.addEventListener('mouseup', () => { game.isShooting = false; });
+        canvas.addEventListener('mouseleave', () => { game.isShooting = false; });
 
-        canvas.addEventListener('mouseleave', () => {
-            game.isShooting = false;
-        });
-
-        // ======== СЕНСОРНОЕ УПРАВЛЕНИЕ (ТЕЛЕФОН) ========
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            const rawX = (touch.clientX - rect.left) * scaleX;
-            const rawY = (touch.clientY - rect.top) * scaleY;
-            mouseX = Math.max(0, Math.min(WIDTH, rawX));
-            mouseY = Math.max(0, Math.min(HEIGHT, rawY));
-            
-            const gridX = Math.floor((rawX - GRID_OFFSET_X) / CELL_SIZE);
-            const gridY = Math.floor((rawY - GRID_OFFSET_Y) / CELL_SIZE);
-            
-            if (gridX >= 0 && gridX < 24 && gridY >= 0 && gridY < 15) {
-                game.mouseGridX = gridX;
-                game.mouseGridY = gridY;
-            } else {
-                game.mouseGridX = -1;
-                game.mouseGridY = -1;
-            }
-        });
-
+        // ТАЧ — стрельба при касании и удержании на канвасе
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
             const touch = e.touches[0];
@@ -1593,54 +1598,47 @@
             const rawY = (touch.clientY - rect.top) * scaleY;
             mouseX = Math.max(0, Math.min(WIDTH, rawX));
             mouseY = Math.max(0, Math.min(HEIGHT, rawY));
-            
-            const gridX = Math.floor((rawX - GRID_OFFSET_X) / CELL_SIZE);
-            const gridY = Math.floor((rawY - GRID_OFFSET_Y) / CELL_SIZE);
-            
-            if (game.placementType && gridX >= 0 && gridX < 24 && gridY >= 0 && gridY < 15) {
-                placeObject(gridX, gridY);
+            const gx = Math.floor((rawX - GRID_OFFSET_X) / CELL_SIZE);
+            const gy = Math.floor((rawY - GRID_OFFSET_Y) / CELL_SIZE);
+            if (game.placementType && gx >= 0 && gx < 24 && gy >= 0 && gy < 15) {
+                placeObject(gx, gy);
                 return;
             }
-            
-            // На мобильных стрельба через кнопку
-        });
-
-        // ======== КНОПКА СТРЕЛЬБЫ (МОБИЛЬНАЯ) ========
-        shootBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
             game.isShooting = true;
         });
 
-        shootBtn.addEventListener('touchend', (e) => {
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const rawX = (touch.clientX - rect.left) * scaleX;
+            const rawY = (touch.clientY - rect.top) * scaleY;
+            mouseX = Math.max(0, Math.min(WIDTH, rawX));
+            mouseY = Math.max(0, Math.min(HEIGHT, rawY));
+            const gx = Math.floor((rawX - GRID_OFFSET_X) / CELL_SIZE);
+            const gy = Math.floor((rawY - GRID_OFFSET_Y) / CELL_SIZE);
+            game.mouseGridX = (gx >= 0 && gx < 24 && gy >= 0 && gy < 15) ? gx : -1;
+            game.mouseGridY = (gx >= 0 && gx < 24 && gy >= 0 && gy < 15) ? gy : -1;
+        });
+
+        canvas.addEventListener('touchend', (e) => {
             e.preventDefault();
             game.isShooting = false;
         });
 
-        shootBtn.addEventListener('touchcancel', (e) => {
+        canvas.addEventListener('touchcancel', (e) => {
             e.preventDefault();
             game.isShooting = false;
         });
 
-        // Для ПК тоже можно кликать по кнопке
-        shootBtn.addEventListener('mousedown', () => {
-            game.isShooting = true;
-        });
-
-        shootBtn.addEventListener('mouseup', () => {
-            game.isShooting = false;
-        });
-
-        shootBtn.addEventListener('mouseleave', () => {
-            game.isShooting = false;
-        });
-
-        // ======== МАГАЗИН (КЛИКИ) ========
+        // ======== КНОПКИ ========
         document.querySelectorAll('.shop-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const type = btn.dataset.type;
                 if (type) selectPlacement(type);
             });
-            // Для тач-устройств
             btn.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 const type = btn.dataset.type;
@@ -1648,7 +1646,6 @@
             });
         });
 
-        // ======== КНОПКИ ========
         nextWaveBtn.addEventListener('click', () => {
             if (game.waveReady && !game.gameOver) startWave();
         });
@@ -1663,7 +1660,6 @@
             resetGame();
         });
 
-        // ======== ПЕРЕЗАПУСК ========
         function resetGame() {
             game.hp = 100;
             game.maxHp = 100;
@@ -1691,29 +1687,25 @@
             gameOverDiv.style.display = 'none';
             nextWaveBtn.disabled = false;
             placementHint.style.display = 'none';
-            document.querySelectorAll('.shop-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.shop-btn').forEach(b => b.classList.remove('active'));
             updateUI();
         }
 
         // ======== АДАПТАЦИЯ ========
         function resizeCanvas() {
-            const maxWidth = window.innerWidth - 10;
-            const maxHeight = window.innerHeight - 10;
-            const scale = Math.min(1, maxWidth / WIDTH, maxHeight / HEIGHT);
+            const maxW = window.innerWidth - 6;
+            const maxH = window.innerHeight - 6;
+            const scale = Math.min(1, maxW / WIDTH, maxH / HEIGHT);
             canvas.style.width = (WIDTH * scale) + 'px';
             canvas.style.height = (HEIGHT * scale) + 'px';
             checkMobile();
         }
         window.addEventListener('resize', resizeCanvas);
-        window.addEventListener('orientationchange', () => {
-            setTimeout(resizeCanvas, 300);
-        });
+        window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 300));
         resizeCanvas();
 
-        // ======== СТАРТ ========
         resetGame();
 
-        // ======== ИГРОВОЙ ЦИКЛ ========
         function gameLoop() {
             update();
             draw();
@@ -1721,9 +1713,8 @@
         }
         gameLoop();
 
-        console.log('🏰 ЗАЩИТА БАШНИ - МОБИЛЬНАЯ ВЕРСИЯ!');
-        console.log('📱 На телефоне: нажимай кнопку "СТРЕЛЯТЬ"');
-        console.log('🖱️ На ПК: зажми ЛКМ для стрельбы');
+        console.log('🏰 ЗАЩИТА БАШНИ — КРАСИВЫЙ ИНТЕРФЕЙС!');
+        console.log('📱 Нажми и держи на поле для стрельбы');
         console.log('⚔️ Нажми "ВОЛНА" для начала!');
     </script>
 </body>

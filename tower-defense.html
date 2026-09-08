@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Защита Башни</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0a0a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            user-select: none;
+        }
+        canvas {
+            border-radius: 12px;
+            box-shadow: 0 0 60px rgba(100, 100, 255, 0.1);
+            display: block;
+            cursor: crosshair;
+            background: #0a0a1a;
+        }
+        #ui {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 25px;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 10px 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 16px;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        #ui span { color: #ffd700; }
+        #ui .hp { color: #ff6b6b; }
+        #ui .hp-bar {
+            display: inline-block;
+            width: 100px;
+            height: 12px;
+            background: #333;
+            border-radius: 6px;
+            overflow: hidden;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+        #ui .hp-bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #ffd93d);
+            transition: width 0.3s;
+            border-radius: 6px;
+        }
+        #ui .combo { color: #ffd93d; }
+        
+        #shop {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 12px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .shop-btn {
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 12px;
+            min-width: 75px;
+            text-align: center;
+        }
+        .shop-btn:hover {
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.1);
+            transform: scale(1.05);
+        }
+        .shop-btn .cost { color: #ffd700; font-weight: bold; }
+        .shop-btn .label { font-size: 10px; color: #aaa; }
+        .shop-btn .level { font-size: 9px; color: #666; }
+        .shop-btn.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        #nextWaveBtn {
+            padding: 10px 25px;
+            background: linear-gradient(135deg, #ffd700, #f7971e);
+            border: none;
+            border-radius: 12px;
+            color: #000;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            z-index: 10;
+        }
+        #nextWaveBtn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+        #nextWaveBtn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 40px 60px;
+            border-radius: 30px;
+            border: 2px solid #ff4444;
+            display: none;
+            z-index: 20;
+            text-align: center;
+            color: #fff;
+        }
+        #gameOver h2 { font-size: 48px; color: #ff4444; }
+        #gameOver p { font-size: 24px; color: #ffd700; margin: 12px 0; }
+        #gameOver button {
+            padding: 12px 40px;
+            background: #ffd700;
+            border: none;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        #gameOver button:hover { transform: scale(1.05); }
+        
+        .wave-announce {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 56px;
+            font-weight: bold;
+            text-shadow: 0 0 40px rgba(255, 215, 0, 0.5);
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        #waveInfo {
+            color: #888;
+            font-size: 14px;
+            text-align: center;
+            padding: 5px 15px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 10px;
+        }
+        @media (max-width: 700px) {
+            #ui { font-size: 12px; gap: 10px; padding: 6px 12px; top: 8px; }
+            #ui .hp-bar { width: 60px; height: 8px; }
+            .shop-btn { padding: 6px 10px; font-size: 10px; min-width: 55px; }
+            #gameOver { padding: 25px 30px; }
+            #gameOver h2 { font-size: 32px; }
+            .wave-announce { font-size: 32px; }
+            #nextWaveBtn { font-size: 13px; padding: 8px 16px; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="ui">
+        <div>
+            ❤️ <span class="hp" id="hpDisplay">100</span>
+            <span class="hp-bar"><span class="fill" id="hpFill" style="width:100%"></span></span>
+        </div>
+        <div>💰 <span id="goldDisplay">50</span></div>
+        <div>⚔️ УР <span id="levelDisplay">0</span></div>
+        <div>🎯 <span id="killsDisplay">0</span></div>
+        <div>🔥 <span class="combo" id="comboDisplay">0</span></div>
+        <div id="waveInfo">⚡ Врагов: <span id="enemyCount">0</span></div>
+    </div>
+    
+    <div id="shop">
+        <div class="shop-btn" data-upgrade="damage">
+            <div class="label">⚔️ Урон</div>
+            <div class="cost">💰 <span id="damageCost">30</span></div>
+            <div class="level">ур. <span id="damageLevel">1</span></div>
+        </div>
+        <div class="shop-btn" data-upgrade="speed">
+            <div class="label">🏃 Скорость</div>
+            <div class="cost">💰 <span id="speedCost">40</span></div>
+            <div class="level">ур. <span id="speedLevel">1</span></div>
+        </div>
+        <div class="shop-btn" data-upgrade="heal">
+            <div class="label">💚 Лечение</div>
+            <div class="cost">💰 25</div>
+            <div class="level">+20 HP</div>
+        </div>
+        <div class="shop-btn" data-upgrade="shield">
+            <div class="label">🛡️ Щит</div>
+            <div class="cost">💰 <span id="shieldCost">50</span></div>
+            <div class="level">ур. <span id="shieldLevel">0</span></div>
+        </div>
+        <button id="nextWaveBtn">⚔️ СЛЕДУЮЩАЯ ВОЛНА</button>
+    </div>
+    
+    <div id="gameOver">
+        <h2>💀 ПОРАЖЕНИЕ</h2>
+        <p>Волна: <span id="finalWave">1</span></p>
+        <p>Убито: <span id="finalKills">0</span></p>
+        <button id="restartBtn">🔄 Играть снова</button>
+    </div>
+    
+    <div class="wave-announce" id="waveAnnounce">🌊 ВОЛНА 1</div>
+
+    <script>
+        // ============================================================
+        // ЗАЩИТА БАШНИ - ПОЛНАЯ ИСПРАВЛЕННАЯ ВЕРСИЯ
+        // ============================================================
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const WIDTH = 1000;
+        const HEIGHT = 650;
+        canvas.width = WIDTH;
+        canvas.height = HEIGHT;
+
+        // DOM элементы
+        const hpDisplay = document.getElementById('hpDisplay');
+        const hpFill = document.getElementById('hpFill');
+        const goldDisplay = document.getElementById('goldDisplay');
+        const levelDisplay = document.getElementById('levelDisplay');
+        const killsDisplay = document.getElementById('killsDisplay');
+        const comboDisplay = document.getElementById('comboDisplay');
+        const enemyCountDisplay = document.getElementById('enemyCount');
+        const damageLevel = document.getElementById('damageLevel');
+        const speedLevel = document.getElementById('speedLevel');
+        const shieldLevel = document.getElementById('shieldLevel');
+        const damageCost = document.getElementById('damageCost');
+        const speedCost = document.getElementById('speedCost');
+        const shieldCost = document.getElementById('shieldCost');
+        const gameOverDiv = document.getElementById('gameOver');
+        const finalWave = document.getElementById('finalWave');
+        const finalKills = document.getElementById('finalKills');
+        const restartBtn = document.getElementById('restartBtn');
+        const waveAnnounce = document.getElementById('waveAnnounce');
+        const nextWaveBtn = document.getElementById('nextWaveBtn');
+
+        // ======== ПАРАМЕТРЫ ========
+        const TOWER_X = WIDTH / 2;
+        const TOWER_Y = HEIGHT - 80;
+        const TOWER_RADIUS = 35;
+
+        let game = {
+            hp: 100,
+            maxHp: 100,
+            gold: 50,
+            kills: 0,
+            wave: 0,
+            damage: 10,
+            damageLevel: 1,
+            attackSpeed: 1,
+            speedLevel: 1,
+            speedMult: 1,
+            shield: 0,
+            shieldLevel: 0,
+            maxShield: 0,
+            enemies: [],
+            bullets: [],
+            particles: [],
+            spawnTimer: 0,
+            enemiesPerWave: 5,
+            enemiesSpawned: 0,
+            waveDelay: 0,
+            gameOver: false,
+            combo: 0,
+            comboTimer: 0,
+            waveActive: false,
+            waveReady: true,
+            upgradeCosts: { damage: 30, speed: 40, heal: 25, shield: 50 }
+        };
+
+        let mouseX = TOWER_X;
+        let mouseY = TOWER_Y;
+        let isShooting = false;
+        let frameCount = 0;
+        let shootTimer = 0;
+
+        // ======== КЛАСС ВРАГ ========
+        class Enemy {
+            constructor(x, y, type = 'normal') {
+                this.x = x;
+                this.y = y;
+                this.type = type;
+                this.radius = 15;
+                this.baseSpeed = 0.6 + Math.random() * 0.3;
+                this.speed = this.baseSpeed;
+                this.hp = 20;
+                this.maxHp = 20;
+                this.damage = 5;
+                this.goldReward = 10;
+                this.angle = Math.atan2(TOWER_Y - y, TOWER_X - x);
+                
+                switch(type) {
+                    case 'fast':
+                        this.radius = 12;
+                        this.baseSpeed = 1.2 + Math.random() * 0.3;
+                        this.hp = 10;
+                        this.maxHp = 10;
+                        this.damage = 4;
+                        this.goldReward = 12;
+                        this.color = '#4fc3f7';
+                        this.icon = '⚡';
+                        break;
+                    case 'tank':
+                        this.radius = 22;
+                        this.baseSpeed = 0.3 + Math.random() * 0.15;
+                        this.hp = 50;
+                        this.maxHp = 50;
+                        this.damage = 8;
+                        this.goldReward = 20;
+                        this.color = '#ff6b6b';
+                        this.icon = '🛡️';
+                        break;
+                    case 'healer':
+                        this.radius = 16;
+                        this.baseSpeed = 0.4 + Math.random() * 0.2;
+                        this.hp = 25;
+                        this.maxHp = 25;
+                        this.damage = 5;
+                        this.goldReward = 18;
+                        this.color = '#51cf66';
+                        this.icon = '💚';
+                        this.healTimer = 0;
+                        break;
+                    case 'boss':
+                        this.radius = 35;
+                        this.baseSpeed = 0.2;
+                        this.hp = 100;
+                        this.maxHp = 100;
+                        this.damage = 15;
+                        this.goldReward = 80;
+                        this.color = '#ffd700';
+                        this.icon = '👑';
+                        break;
+                    default:
+                        this.color = '#ff922b';
+                        this.icon = '👾';
+                }
+                
+                // Масштабирование от волны
+                const waveScale = 1 + (game.wave - 1) * 0.15;
+                this.hp = Math.floor(this.hp * waveScale);
+                this.maxHp = this.hp;
+                this.damage = Math.floor(this.damage * waveScale);
+                this.speed = this.baseSpeed * (1 + (game.wave - 1) * 0.03);
+                this.goldReward = Math.floor(this.goldReward * waveScale);
+            }
+
+            update() {
+                this.angle = Math.atan2(TOWER_Y - this.y, TOWER_X - this.x);
+                this.x += Math.cos(this.angle) * this.speed * game.speedMult;
+                this.y += Math.sin(this.angle) * this.speed * game.speedMult;
+
+                if (this.type === 'healer') {
+                    this.healTimer++;
+                    if (this.healTimer % 60 === 0) {
+                        this.hp = Math.min(this.maxHp, this.hp + 3);
+                    }
+                }
+
+                const dist = Math.sqrt((this.x - TOWER_X) ** 2 + (this.y - TOWER_Y) ** 2);
+                if (dist < TOWER_RADIUS + this.radius) {
+                    this.hitTower();
+                    return true;
+                }
+                return false;
+            }
+
+            hitTower() {
+                let damage = this.damage;
+                if (game.shield > 0) {
+                    game.shield--;
+                    damage = Math.floor(damage / 2);
+                }
+                game.hp -= damage;
+                if (game.hp < 0) game.hp = 0;
+                updateUI();
+                if (game.hp <= 0) endGame();
+                
+                for (let i = 0; i < 10; i++) {
+                    game.particles.push({
+                        x: TOWER_X,
+                        y: TOWER_Y,
+                        vx: (Math.random() - 0.5) * 6,
+                        vy: (Math.random() - 0.5) * 6 - 2,
+                        life: 20,
+                        maxLife: 20,
+                        color: '#ff4444',
+                        size: 2 + Math.random() * 4
+                    });
+                }
+            }
+
+            takeDamage(dmg) {
+                this.hp -= dmg;
+                if (this.hp <= 0) {
+                    game.gold += this.goldReward;
+                    game.kills++;
+                    game.combo++;
+                    game.comboTimer = 120;
+                    
+                    for (let i = 0; i < 15; i++) {
+                        game.particles.push({
+                            x: this.x,
+                            y: this.y,
+                            vx: (Math.random() - 0.5) * 8,
+                            vy: (Math.random() - 0.5) * 8,
+                            life: 30,
+                            maxLife: 30,
+                            color: this.color,
+                            size: 2 + Math.random() * 4
+                        });
+                    }
+                    updateUI();
+                    return true;
+                }
+                return false;
+            }
+
+            draw() {
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                
+                const hpPercent = this.hp / this.maxHp;
+                const barWidth = this.radius * 2;
+                ctx.fillStyle = 'rgba(0,0,0,0.6)';
+                ctx.fillRect(this.x - barWidth/2, this.y - this.radius - 8, barWidth, 4);
+                ctx.fillStyle = hpPercent > 0.5 ? '#51cf66' : hpPercent > 0.25 ? '#ffd93d' : '#ff6b6b';
+                ctx.fillRect(this.x - barWidth/2, this.y - this.radius - 8, barWidth * hpPercent, 4);
+                
+                ctx.fillStyle = '#fff';
+                ctx.font = '16px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.icon, this.x, this.y + 1);
+            }
+        }
+
+        // ======== КЛАСС ПУЛИ ========
+        class Bullet {
+            constructor(x, y, angle, damage) {
+                this.x = x;
+                this.y = y;
+                this.angle = angle;
+                this.speed = 7;
+                this.damage = damage;
+                this.radius = 5;
+                this.life = 200;
+            }
+
+            update() {
+                this.x += Math.cos(this.angle) * this.speed;
+                this.y += Math.sin(this.angle) * this.speed;
+                this.life--;
+                return this.life > 0 && this.x > -50 && this.x < WIDTH + 50 && 
+                       this.y > -50 && this.y < HEIGHT + 50;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffd700';
+                ctx.shadowColor = '#ffd700';
+                ctx.shadowBlur = 15;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.beginPath();
+                ctx.arc(this.x - Math.cos(this.angle) * 8, this.y - Math.sin(this.angle) * 8, this.radius * 0.5, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 215, 0, 0.2)';
+                ctx.fill();
+            }
+        }
+
+        // ======== СПАВН ========
+        function spawnEnemy() {
+            const types = ['normal', 'normal'];
+            if (game.wave > 2) types.push('fast');
+            if (game.wave > 4) { types.push('fast'); types.push('tank'); }
+            if (game.wave > 6) types.push('healer');
+            if (game.wave > 8) { types.push('tank'); types.push('tank'); }
+            if (game.wave > 12 && game.wave % 5 === 0) types.push('boss');
+            
+            const type = types[Math.floor(Math.random() * types.length)];
+            const side = Math.floor(Math.random() * 4);
+            let x, y;
+            const margin = 30;
+            switch(side) {
+                case 0: x = margin + Math.random() * (WIDTH - margin * 2); y = margin; break;
+                case 1: x = WIDTH - margin; y = margin + Math.random() * (HEIGHT - margin * 2); break;
+                case 2: x = margin + Math.random() * (WIDTH - margin * 2); y = HEIGHT - margin; break;
+                case 3: x = margin; y = margin + Math.random() * (HEIGHT - margin * 2); break;
+            }
+            
+            const enemy = new Enemy(x, y, type);
+            game.enemies.push(enemy);
+        }
+
+        // ======== ВОЛНЫ ========
+        function startWave() {
+            if (game.gameOver) return;
+            game.wave++;
+            game.enemiesPerWave = 4 + game.wave * 2;
+            game.enemiesSpawned = 0;
+            game.spawnTimer = 0;
+            game.waveActive = true;
+            game.waveReady = false;
+            nextWaveBtn.disabled = true;
+            
+            waveAnnounce.textContent = `🌊 ВОЛНА ${game.wave}`;
+            waveAnnounce.style.opacity = 1;
+            setTimeout(() => { waveAnnounce.style.opacity = 0; }, 1500);
+            updateUI();
+        }
+
+        function updateWave() {
+            if (game.gameOver || !game.waveActive) return;
+            
+            if (game.enemiesSpawned < game.enemiesPerWave) {
+                game.spawnTimer--;
+                if (game.spawnTimer <= 0) {
+                    spawnEnemy();
+                    game.enemiesSpawned++;
+                    const baseDelay = Math.max(20, 50 - game.wave * 1);
+                    game.spawnTimer = baseDelay + Math.random() * 20;
+                }
+            } else if (game.enemies.length === 0) {
+                game.waveActive = false;
+                game.waveReady = true;
+                nextWaveBtn.disabled = false;
+                
+                const bonus = 10 + game.wave * 3;
+                game.gold += bonus;
+                
+                for (let i = 0; i < 25; i++) {
+                    game.particles.push({
+                        x: TOWER_X + (Math.random() - 0.5) * 150,
+                        y: TOWER_Y + (Math.random() - 0.5) * 150,
+                        vx: (Math.random() - 0.5) * 12,
+                        vy: (Math.random() - 0.5) * 12 - 5,
+                        life: 50,
+                        maxLife: 50,
+                        color: '#ffd700',
+                        size: 2 + Math.random() * 5
+                    });
+                }
+                updateUI();
+            }
+        }
+
+        // ======== СТРЕЛЬБА ========
+        function shoot() {
+            if (game.gameOver) return;
+            const angle = Math.atan2(mouseY - TOWER_Y, mouseX - TOWER_X);
+            const bullet = new Bullet(TOWER_X, TOWER_Y, angle, game.damage);
+            game.bullets.push(bullet);
+            
+            for (let i = 0; i < 4; i++) {
+                game.particles.push({
+                    x: TOWER_X + Math.cos(angle) * TOWER_RADIUS,
+                    y: TOWER_Y + Math.sin(angle) * TOWER_RADIUS,
+                    vx: Math.cos(angle + (Math.random() - 0.5) * 0.5) * (1 + Math.random() * 2),
+                    vy: Math.sin(angle + (Math.random() - 0.5) * 0.5) * (1 + Math.random() * 2),
+                    life: 12,
+                    maxLife: 12,
+                    color: '#ffd700',
+                    size: 2 + Math.random() * 2
+                });
+            }
+        }
+
+        // ======== ОБНОВЛЕНИЕ ========
+        function update() {
+            if (game.gameOver) return;
+            
+            frameCount++;
+            
+            if (isShooting) {
+                shootTimer--;
+                if (shootTimer <= 0) {
+                    shoot();
+                    shootTimer = Math.max(5, 20 - game.attackSpeed * 6);
+                }
+            }
+            
+            // Пули
+            for (let i = game.bullets.length - 1; i >= 0; i--) {
+                const bullet = game.bullets[i];
+                const alive = bullet.update();
+                if (!alive) { game.bullets.splice(i, 1); continue; }
+                
+                let hit = false;
+                for (let j = game.enemies.length - 1; j >= 0; j--) {
+                    const enemy = game.enemies[j];
+                    const dist = Math.sqrt((bullet.x - enemy.x) ** 2 + (bullet.y - enemy.y) ** 2);
+                    if (dist < bullet.radius + enemy.radius) {
+                        const killed = enemy.takeDamage(bullet.damage);
+                        if (killed) {
+                            game.enemies.splice(j, 1);
+                            if (game.combo > 10) {
+                                game.gold += Math.floor(game.combo / 5);
+                            }
+                            updateUI();
+                        }
+                        hit = true;
+                        break;
+                    }
+                }
+                if (hit) game.bullets.splice(i, 1);
+            }
+            
+            // Враги
+            for (let i = game.enemies.length - 1; i >= 0; i--) {
+                const enemy = game.enemies[i];
+                const reached = enemy.update();
+                if (reached) game.enemies.splice(i, 1);
+            }
+            
+            // Частицы
+            for (let i = game.particles.length - 1; i >= 0; i--) {
+                const p = game.particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.05;
+                p.life--;
+                if (p.life <= 0) game.particles.splice(i, 1);
+            }
+            
+            if (game.comboTimer > 0) {
+                game.comboTimer--;
+                if (game.comboTimer === 0) game.combo = 0;
+            }
+            
+            updateWave();
+            updateUI();
+        }
+
+        // ======== ОТРИСОВКА ========
+        function draw() {
+            ctx.clearRect(0, 0, WIDTH, HEIGHT);
+            
+            // Фон
+            const grad = ctx.createRadialGradient(TOWER_X, TOWER_Y, 0, TOWER_X, TOWER_Y, 600);
+            grad.addColorStop(0, '#1a1a3e');
+            grad.addColorStop(1, '#0a0a1a');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, WIDTH, HEIGHT);
+            
+            // Сетка
+            ctx.strokeStyle = 'rgba(255,255,255,0.02)';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < WIDTH; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, HEIGHT);
+                ctx.stroke();
+            }
+            for (let y = 0; y < HEIGHT; y += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(WIDTH, y);
+                ctx.stroke();
+            }
+            
+            // Радиус атаки
+            ctx.beginPath();
+            ctx.arc(TOWER_X, TOWER_Y, 300, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(255, 215, 0, 0.04)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            
+            // Частицы
+            for (let p of game.particles) {
+                const alpha = p.life / p.maxLife;
+                ctx.globalAlpha = alpha;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+            
+            // Враги
+            for (let enemy of game.enemies) enemy.draw();
+            
+            // Пули
+            for (let bullet of game.bullets) bullet.draw();
+            
+            // ===== БАШНЯ (улучшенная видимость) =====
+            ctx.shadowColor = 'rgba(255, 215, 0, 0.3)';
+            ctx.shadowBlur = 40;
+            
+            // Основание
+            ctx.beginPath();
+            ctx.arc(TOWER_X, TOWER_Y, TOWER_RADIUS, 0, Math.PI * 2);
+            ctx.fillStyle = '#2d2d5e';
+            ctx.fill();
+            
+            // Стены
+            ctx.shadowBlur = 20;
+            ctx.beginPath();
+            ctx.arc(TOWER_X, TOWER_Y, TOWER_RADIUS - 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#4a4a8a';
+            ctx.fill();
+            
+            // Верхушка
+            ctx.beginPath();
+            ctx.arc(TOWER_X, TOWER_Y - 8, TOWER_RADIUS - 12, 0, Math.PI * 2);
+            ctx.fillStyle = '#5a5aaa';
+            ctx.fill();
+            
+            // Крыша
+            ctx.beginPath();
+            ctx.moveTo(TOWER_X - 20, TOWER_Y - 20);
+            ctx.lineTo(TOWER_X, TOWER_Y - 45);
+            ctx.lineTo(TOWER_X + 20, TOWER_Y - 20);
+            ctx.closePath();
+            ctx.fillStyle = '#6a6aba';
+            ctx.fill();
+            
+            ctx.shadowBlur = 0;
+            
+            // Огонь на башне
+            for (let i = 0; i < 10; i++) {
+                const angle = (i / 10) * Math.PI * 2 + frameCount * 0.03;
+                const r = TOWER_RADIUS - 6 + Math.sin(frameCount * 0.08 + i * 1.5) * 4;
+                const x = TOWER_X + Math.cos(angle) * r;
+                const y = TOWER_Y - 4 + Math.sin(angle) * r;
+                const size = 2 + Math.sin(frameCount * 0.12 + i * 1.2) * 2 + 1;
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                const bright = 0.4 + Math.sin(frameCount * 0.1 + i * 1.3) * 0.2;
+                ctx.fillStyle = `rgba(255, 200, 50, ${bright})`;
+                ctx.fill();
+            }
+            
+            // Окошко башни
+            ctx.beginPath();
+            ctx.arc(TOWER_X, TOWER_Y - 5, 10, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(100, 200, 255, 0.15)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(100, 200, 255, 0.2)';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            
+            // Свечение в окне
+            ctx.beginPath();
+            ctx.arc(TOWER_X, TOWER_Y - 5, 6, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(100, 200, 255, ${0.1 + Math.sin(frameCount * 0.05) * 0.05})`;
+            ctx.fill();
+            
+            // Щит
+            if (game.shield > 0) {
+                ctx.beginPath();
+                ctx.arc(TOWER_X, TOWER_Y, TOWER_RADIUS + 12, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(100, 200, 255, ${0.2 + Math.sin(frameCount * 0.05) * 0.1})`;
+                ctx.lineWidth = 3;
+                ctx.setLineDash([6, 12]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+            
+            // Комбо индикатор
+            if (game.combo > 5) {
+                ctx.fillStyle = '#ffd93d';
+                ctx.font = 'bold 22px Arial';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'top';
+                ctx.shadowColor = '#ffd93d';
+                ctx.shadowBlur = 30;
+                ctx.fillText(`🔥 x${game.combo}`, 20, 75);
+                ctx.shadowBlur = 0;
+            }
+            
+            // Индикатор готовности волны
+            if (game.waveReady && game.wave > 0) {
+                ctx.fillStyle = 'rgba(255, 215, 0, 0.4)';
+                ctx.font = '18px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText('⚔️ Нажми "Следующая волна"', TOWER_X, TOWER_Y - 65);
+            }
+        }
+
+        // ======== UI ========
+        function updateUI() {
+            const hpPercent = (game.hp / game.maxHp) * 100;
+            hpDisplay.textContent = Math.floor(game.hp);
+            hpFill.style.width = Math.max(0, hpPercent) + '%';
+            goldDisplay.textContent = game.gold;
+            levelDisplay.textContent = game.wave || 0;
+            killsDisplay.textContent = game.kills;
+            comboDisplay.textContent = game.combo || 0;
+            enemyCountDisplay.textContent = game.enemies.length;
+            damageLevel.textContent = game.damageLevel;
+            speedLevel.textContent = game.speedLevel;
+            shieldLevel.textContent = game.shieldLevel;
+            damageCost.textContent = 30 + game.damageLevel * 15;
+            speedCost.textContent = 40 + game.speedLevel * 20;
+            shieldCost.textContent = 50 + game.shieldLevel * 30;
+        }
+
+        function endGame() {
+            if (game.gameOver) return;
+            game.gameOver = true;
+            finalWave.textContent = game.wave;
+            finalKills.textContent = game.kills;
+            gameOverDiv.style.display = 'block';
+            nextWaveBtn.disabled = true;
+        }
+
+        // ======== УПРАВЛЕНИЕ ========
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            mouseX = (e.clientX - rect.left) * scaleX;
+            mouseY = (e.clientY - rect.top) * scaleY;
+        });
+
+        canvas.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            isShooting = true;
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isShooting = false;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            isShooting = false;
+        });
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            mouseX = (touch.clientX - rect.left) * scaleX;
+            mouseY = (touch.clientY - rect.top) * scaleY;
+            isShooting = true;
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            mouseX = (touch.clientX - rect.left) * scaleX;
+            mouseY = (touch.clientY - rect.top) * scaleY;
+        });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            isShooting = false;
+        });
+
+        // Магазин
+        document.querySelectorAll('.shop-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const upgrade = btn.dataset.upgrade;
+                buyUpgrade(upgrade);
+            });
+        });
+
+        function buyUpgrade(type) {
+            if (game.gameOver) return;
+            
+            const costs = {
+                damage: 30 + game.damageLevel * 15,
+                speed: 40 + game.speedLevel * 20,
+                heal: 25,
+                shield: 50 + game.shieldLevel * 30
+            };
+            
+            const cost = costs[type];
+            if (game.gold < cost) return;
+            
+            game.gold -= cost;
+            
+            switch(type) {
+                case 'damage':
+                    game.damageLevel++;
+                    game.damage += 5;
+                    break;
+                case 'speed':
+                    game.speedLevel++;
+                    game.attackSpeed += 0.2;
+                    break;
+                case 'heal':
+                    game.hp = Math.min(game.maxHp, game.hp + 20);
+                    break;
+                case 'shield':
+                    game.shieldLevel++;
+                    game.shield++;
+                    game.maxShield++;
+                    break;
+            }
+            updateUI();
+        }
+
+        // Следующая волна
+        nextWaveBtn.addEventListener('click', () => {
+            if (game.waveReady && !game.gameOver) {
+                startWave();
+            }
+        });
+
+        // Перезапуск
+        restartBtn.addEventListener('click', resetGame);
+
+        function resetGame() {
+            game.hp = 100;
+            game.maxHp = 100;
+            game.gold = 50;
+            game.kills = 0;
+            game.wave = 0;
+            game.damage = 10;
+            game.damageLevel = 1;
+            game.attackSpeed = 1;
+            game.speedLevel = 1;
+            game.speedMult = 1;
+            game.shield = 0;
+            game.shieldLevel = 0;
+            game.enemies = [];
+            game.bullets = [];
+            game.particles = [];
+            game.gameOver = false;
+            game.combo = 0;
+            game.comboTimer = 0;
+            game.waveActive = false;
+            game.waveReady = true;
+            gameOverDiv.style.display = 'none';
+            nextWaveBtn.disabled = false;
+            updateUI();
+            // Первая волна не начинается автоматически!
+        }
+
+        // ======== АДАПТАЦИЯ ========
+        function resizeCanvas() {
+            const maxWidth = window.innerWidth - 40;
+            const maxHeight = window.innerHeight - 40;
+            const scale = Math.min(1, maxWidth / WIDTH, maxHeight / HEIGHT);
+            canvas.style.width = (WIDTH * scale) + 'px';
+            canvas.style.height = (HEIGHT * scale) + 'px';
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // ======== СТАРТ ========
+        resetGame();
+
+        // ======== ИГРОВОЙ ЦИКЛ ========
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+        gameLoop();
+
+        console.log('🏰 ЗАЩИТА БАШНИ ЗАПУЩЕНА!');
+        console.log('🎯 Наведи мышку на врагов и стреляй!');
+        console.log('💰 Убивай врагов, покупай улучшения!');
+        console.log('⚔️ Нажми "Следующая волна" для начала битвы!');
+    </script>
+</body>
+</html>
